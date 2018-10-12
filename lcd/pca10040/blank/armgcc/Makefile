@@ -11,8 +11,6 @@ $(OUTPUT_DIRECTORY)/nrf52832_xxaa.out: \
 # Source files common to all targets
 SRC_FILES += \
   $(SDK_ROOT)/modules/nrfx/mdk/gcc_startup_nrf52.S \
-  $(SDK_ROOT)/components/drivers_ext/ili9341/ili9341.c \
-  $(SDK_ROOT)/components/drivers_ext/st7735/st7735.c \
   $(SDK_ROOT)/components/libraries/log/src/nrf_log_backend_rtt.c \
   $(SDK_ROOT)/components/libraries/log/src/nrf_log_backend_serial.c \
   $(SDK_ROOT)/components/libraries/log/src/nrf_log_backend_uart.c \
@@ -48,6 +46,7 @@ SRC_FILES += \
   $(SDK_ROOT)/external/thedotfactory_fonts/orkney24pts.c \
   $(SDK_ROOT)/external/thedotfactory_fonts/orkney8pts.c \
   $(PROJ_DIR)/main.c \
+  $(PROJ_DIR)/sharp.c \
   $(SDK_ROOT)/external/segger_rtt/SEGGER_RTT.c \
   $(SDK_ROOT)/external/segger_rtt/SEGGER_RTT_Syscalls_GCC.c \
   $(SDK_ROOT)/external/segger_rtt/SEGGER_RTT_printf.c \
@@ -65,7 +64,6 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/libraries/ringbuf \
   $(SDK_ROOT)/modules/nrfx/hal \
   $(SDK_ROOT)/components/libraries/log \
-  $(SDK_ROOT)/components/drivers_ext/ili9341 \
   $(SDK_ROOT)/modules/nrfx \
   $(SDK_ROOT)/components/libraries/experimental_section_vars \
   $(SDK_ROOT)/integration/nrfx/legacy \
@@ -76,7 +74,6 @@ INC_FOLDERS += \
   $(SDK_ROOT)/external/segger_rtt \
   $(SDK_ROOT)/components/boards \
   $(SDK_ROOT)/components/libraries/memobj \
-  $(SDK_ROOT)/components/drivers_ext/st7735 \
   $(SDK_ROOT)/external/fprintf \
   $(SDK_ROOT)/modules/nrfx/drivers/include \
   $(SDK_ROOT)/components/libraries/log/src \
