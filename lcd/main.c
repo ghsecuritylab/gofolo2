@@ -156,22 +156,23 @@ int main(void)
 
     gfx_initialization();
 
+    brackground_set();
     while (1)
     {
-       brackground_set();
-       /*
-        *text_print();
-        *nrf_delay_ms(1000);
-        *screen_clear();
-        *line_draw();
-        *nrf_delay_ms(1000);
-        *screen_clear();
-        *circle_draw();
-        *nrf_delay_ms(1000);
-        *screen_clear();
-        *rect_draw();
-        *nrf_delay_ms(1000);
-        */
+        nrf_delay_ms(1000);
+        if(0) {
+            text_print();
+            nrf_delay_ms(1000);
+            screen_clear();
+            line_draw();
+            nrf_delay_ms(1000);
+            screen_clear();
+            circle_draw();
+            nrf_delay_ms(1000);
+            screen_clear();
+            rect_draw();
+            nrf_delay_ms(1000);
+        }
     }
 }
 
