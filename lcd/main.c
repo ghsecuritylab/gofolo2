@@ -35,20 +35,17 @@ static void gfx_initialization(void)
     APP_ERROR_CHECK(nrf_gfx_init(p_lcd));
 }
 
-static void brackground_set(void)
-{
-    nrf_gfx_display(p_lcd);
-}
-
 static void text_print(void)
 {
     nrf_gfx_point_t text_start = NRF_GFX_POINT(5, nrf_gfx_height_get(p_lcd) - 50);
     APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &text_start, 0, test_text, p_font, true));
+    nrf_gfx_display(p_lcd);
 }
 
 static void screen_clear(void)
 {
-    nrf_gfx_screen_fill(p_lcd, WHITE);
+    nrf_gfx_screen_fill(p_lcd, BLACK);
+    nrf_gfx_display(p_lcd);
 }
 
 static void line_draw(void)
@@ -83,6 +80,7 @@ static void line_draw(void)
         my_line_2.x_end = i;
         APP_ERROR_CHECK(nrf_gfx_line_draw(p_lcd, &my_line_2, WHITE));
     }
+    nrf_gfx_display(p_lcd);
 }
 
 static void circle_draw(void)
@@ -108,6 +106,7 @@ static void circle_draw(void)
             APP_ERROR_CHECK(nrf_gfx_circle_draw(p_lcd, &my_circle, BLACK, false));
         }
     }
+    nrf_gfx_display(p_lcd);
 }
 
 static void rect_draw(void)
@@ -144,34 +143,49 @@ static void rect_draw(void)
 
     nrf_gfx_rotation_set(p_lcd, NRF_LCD_ROTATE_0);
 
+    nrf_gfx_display(p_lcd);
 }
+
+#if 0
+static ret_code_t test(void)
+{
+    ret_code_t err_code;
+
+    nrf_gpio_cfg_output(20);
+    nrf_gpio_pin_set(20); 
+
+    nrf_drv_spi_config_t spi_config = NRF_DRV_SPI_DEFAULT_CONFIG;
+    spi_config.frequency = NRF_DRV_SPI_FREQ_1M;
+    spi_config.ss_pin = 28;
+    spi_config.mosi_pin = 5;
+    spi_config.sck_pin = 4;
+
+    spi_config.mode = NRF_DRV_SPI_MODE_0;
+    spi_config.bit_order = NRF_DRV_SPI_BIT_ORDER_LSB_FIRST;
+
+    err_code = nrf_drv_spi_init(&spi, &spi_config, NULL, NULL);
+
+    return err_code;
+}
+#endif
+
+ret_code_t sharp_init(void);
+void toggle_vcom();
 
 int main(void)
 {
-    APP_ERROR_CHECK(NRF_LOG_INIT(NULL));
-    NRF_LOG_DEFAULT_BACKENDS_INIT();
-
-    NRF_LOG_INFO("GFX usage example application started.")
-    NRF_LOG_FLUSH();
-
     gfx_initialization();
-
-    brackground_set();
     while (1)
     {
-        nrf_delay_ms(1000);
-        if(0) {
+        nrf_delay_ms(100);
+        if(1) {
+        screen_clear();
             text_print();
-            nrf_delay_ms(1000);
-            screen_clear();
             line_draw();
-            nrf_delay_ms(1000);
             screen_clear();
             circle_draw();
-            nrf_delay_ms(1000);
             screen_clear();
             rect_draw();
-            nrf_delay_ms(1000);
         }
     }
 }
