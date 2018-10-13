@@ -22,12 +22,12 @@
 
 #define BORDER          2
 
-static const char * test_text = "### GoFolo ###";
+static const char * test_text = "01234 Mika 56789";
 
-extern const nrf_gfx_font_desc_t orkney_24ptFontInfo;
+extern const nrf_gfx_font_desc_t orkney_8ptFontInfo;
 extern const nrf_lcd_t nrf_lcd_sharp;
 
-static const nrf_gfx_font_desc_t * p_font = &orkney_24ptFontInfo;
+static const nrf_gfx_font_desc_t * p_font = &orkney_8ptFontInfo;
 static const nrf_lcd_t * p_lcd = &nrf_lcd_sharp;
 
 static void gfx_initialization(void)
@@ -37,14 +37,14 @@ static void gfx_initialization(void)
 
 static void text_print(void)
 {
-    nrf_gfx_point_t text_start = NRF_GFX_POINT(5, nrf_gfx_height_get(p_lcd) - 50);
+    nrf_gfx_point_t text_start = NRF_GFX_POINT(0, 128 - 15);
     APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &text_start, 0, test_text, p_font, true));
     nrf_gfx_display(p_lcd);
 }
 
 static void screen_clear(void)
 {
-    nrf_gfx_screen_fill(p_lcd, BLACK);
+    nrf_gfx_screen_fill(p_lcd, WHITE);
     nrf_gfx_display(p_lcd);
 }
 
@@ -115,33 +115,14 @@ static void rect_draw(void)
                              nrf_gfx_height_get(p_lcd) / nrf_gfx_width_get(p_lcd),
                              nrf_gfx_height_get(p_lcd),
                              BORDER);
-    nrf_gfx_rect_t my_rect_fill = NRF_GFX_RECT(nrf_gfx_width_get(p_lcd) / 2,
-                                  nrf_gfx_height_get(p_lcd) / nrf_gfx_width_get(p_lcd),
-                                  nrf_gfx_height_get(p_lcd),
-                                  BORDER);
 
-    nrf_gfx_rotation_set(p_lcd, NRF_LCD_ROTATE_90);
+    my_rect.x = 0;
+    my_rect.y = 0;
+    my_rect.width = 50;
+    my_rect.height = 50;
 
-    for (uint16_t i = 0, j = 0;
-        i <= (nrf_gfx_width_get(p_lcd) - (2 * BORDER)) / 2 &&
-        j <= (nrf_gfx_height_get(p_lcd) - (2 * BORDER)) / 2;
-        i += 6, j += 8)
-    {
-        my_rect.x = i;
-        my_rect.y = j;
-        my_rect_fill.x = i + BORDER;
-        my_rect_fill.y = j + BORDER;
-        my_rect.width = nrf_gfx_width_get(p_lcd) - i * 2;
-        my_rect.height = nrf_gfx_height_get(p_lcd) - j * 2;
-        my_rect_fill.width = nrf_gfx_width_get(p_lcd) - i * 2 - (2 * BORDER);
-        my_rect_fill.height = nrf_gfx_height_get(p_lcd) - j * 2 - (2 * BORDER);
-
-        // Draw using pseudo-random colors.
-        APP_ERROR_CHECK(nrf_gfx_rect_draw(p_lcd, &my_rect, 2, ((i + j) * 10), false));
-        APP_ERROR_CHECK(nrf_gfx_rect_draw(p_lcd, &my_rect_fill, 2, (UINT16_MAX - (i + j) * 10), true));
-    }
-
-    nrf_gfx_rotation_set(p_lcd, NRF_LCD_ROTATE_0);
+    // Draw using pseudo-random colors.
+    APP_ERROR_CHECK(nrf_gfx_rect_draw(p_lcd, &my_rect, 1, BLACK, true));
 
     nrf_gfx_display(p_lcd);
 }
@@ -175,12 +156,14 @@ void toggle_vcom();
 int main(void)
 {
     gfx_initialization();
+    text_print();
     while (1)
     {
-        nrf_delay_ms(100);
-        if(1) {
-        screen_clear();
-            text_print();
+        toggle_vcom();
+        if(0) {
+        rect_draw();
+            nrf_delay_ms(100);
+            screen_clear();
             line_draw();
             screen_clear();
             circle_draw();

@@ -10,26 +10,17 @@
 #define LCD_SPI_SCK_PIN 4
 #define LCD_SPI_MOSI_PIN 5
 
-uint8_t **m = (uint8_t **)frame;
+typedef uint8_t matrix_ptr_t[16];
+matrix_ptr_t *m = (matrix_ptr_t *)frame;
 
 static const nrf_drv_spi_t spi = NRF_DRV_SPI_INSTANCE(1);
 
 static void sharp_pixel_draw(uint16_t x, uint16_t y, uint32_t color)
 {
     if(color)
-        m[x / 8][y] = m[x / 8][y] & (1 << x % 8);
+        frame[x / 8 + 16 * y] = frame[x / 8 + 16 * y] | (1 << (7 - x % 8));
     else
-        m[x / 8][y] = m[x / 8][y] & ~(1 << x % 8);
-}
-
-static int _sharp_pixel_draw(uint16_t x, uint16_t y, uint32_t color)
-{
-    if(color)
-        m[x / 8][y] = m[x / 8][y] & (1 << x % 8);
-    else
-        m[x / 8][y] = m[x / 8][y] & ~(1 << x % 8);
-
-    return 0;
+        frame[x / 8 + 16 * y] = frame[x / 8 + 16 * y] & ~(1 << (7 - x % 8));
 }
 
 static void sharp_rect_draw(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint32_t color)
@@ -38,9 +29,10 @@ static void sharp_rect_draw(uint16_t x, uint16_t y, uint16_t width, uint16_t hei
 
     for(i = x; i < width; i++) {
         for(j = y; j < height; j++) {
-          _sharp_pixel_draw(i, j, color);
+          sharp_pixel_draw(i, j, color);
         }
     }
+    
 }
 
 static void sharp_rotation_set(nrf_lcd_rotation_t rotation)
