@@ -3,6 +3,43 @@
 #include "nrf_drv_spi.h"
 #include "nrf_gpio.h"
 #include "frame.h"
+#include "frames/f00.h"
+#include "frames/f10.h"
+#include "frames/f20.h"
+#include "frames/f30.h"
+#include "frames/f40.h"
+#include "frames/f50.h"
+#include "frames/f60.h"
+#include "frames/f70.h"
+#include "frames/f80.h"
+#include "frames/f90.h"
+#include "frames/f100.h"
+#include "frames/f110.h"
+#include "frames/f120.h"
+#include "frames/f130.h"
+#include "frames/f140.h"
+#include "frames/f150.h"
+#include "frames/f160.h"
+#include "frames/f170.h"
+#include "frames/f180.h"
+#include "frames/f190.h"
+#include "frames/f200.h"
+#include "frames/f210.h"
+#include "frames/f220.h"
+#include "frames/f230.h"
+#include "frames/f240.h"
+#include "frames/f250.h"
+#include "frames/f260.h"
+#include "frames/f270.h"
+#include "frames/f280.h"
+#include "frames/f290.h"
+#include "frames/f300.h"
+#include "frames/f310.h"
+#include "frames/f320.h"
+#include "frames/f330.h"
+#include "frames/f340.h"
+#include "frames/f350.h"
+
 #include "nrf_delay.h"
 
 #define DISP_EN_PIN 20
@@ -71,7 +108,7 @@ void toggle_vcom()
     vcom[0] = 0x00;
     vcom[1] = 0x00;
 
-    while(i == 5) {
+    while(i == 2) {
         vcom[0] = ((1 & (i / 2)) << 1);
         nrf_gpio_pin_set(LCD_SPI_SS_PIN); 
         nrf_delay_ms(5000);
@@ -100,7 +137,7 @@ static void sharp_display(void)
         nrf_gpio_pin_clear(LCD_SPI_SS_PIN); 
     }
 
-    toggle_vcom();
+    //toggle_vcom();
 }
 
 void clear_lcd()
@@ -127,8 +164,7 @@ ret_code_t sharp_init(void)
     nrf_gpio_cfg_output(LCD_SPI_SS_PIN);
 
     nrf_drv_spi_config_t spi_config = NRF_DRV_SPI_DEFAULT_CONFIG;
-    spi_config.frequency = NRF_SPI_FREQ_125K;
-    //spi_config.ss_pin = LCD_SPI_SS_PIN;
+    spi_config.frequency = NRF_SPIM_FREQ_1M;
     spi_config.mosi_pin = LCD_SPI_MOSI_PIN;
     spi_config.sck_pin = LCD_SPI_SCK_PIN;
 
@@ -159,3 +195,162 @@ const nrf_lcd_t nrf_lcd_sharp = {
     .lcd_display_invert = sharp_display_invert,
     .p_lcd_cb = &sharp_cb
 };
+
+char select_frame ()
+{
+    static int f = 0;
+
+    f++;
+
+    switch(f % 36) {
+        case 0:
+            memcpy(frame, f0, sizeof(frame));
+            return 0;
+            break;
+        case 1:
+            memcpy(frame, f1, sizeof(frame));
+            return 1;
+            break;
+        case 2:
+            memcpy(frame, f2, sizeof(frame));
+            return 2;
+            break;
+        case 3:
+            memcpy(frame, f3, sizeof(frame));
+            return 3;
+            break;
+        case 4:
+            memcpy(frame, f4, sizeof(frame));
+            return 4;
+            break;
+        case 5:
+            memcpy(frame, f5, sizeof(frame));
+            return 5;
+            break;
+        case 6:
+            memcpy(frame, f6, sizeof(frame));
+            return 6;
+            break;
+        case 7:
+            memcpy(frame, f7, sizeof(frame));
+            return 7;
+            break;
+        case 8:
+            memcpy(frame, f8, sizeof(frame));
+            return 8;
+            break;
+        case 9:
+            memcpy(frame, f9, sizeof(frame));
+            return 9;
+            break;
+        case 10:
+            memcpy(frame, f10, sizeof(frame));
+            return 10;
+            break;
+        case 11:
+            memcpy(frame, f11, sizeof(frame));
+            return 11;
+            break;
+        case 12:
+            memcpy(frame, f12, sizeof(frame));
+            return 12;
+            break;
+        case 13:
+            memcpy(frame, f13, sizeof(frame));
+            return 13;
+            break;
+        case 14:
+            memcpy(frame, f14, sizeof(frame));
+            return 14;
+            break;
+        case 15:
+            memcpy(frame, f15, sizeof(frame));
+            return 15;
+            break;
+        case 16:
+            memcpy(frame, f16, sizeof(frame));
+            return 16;
+            break;
+        case 17:
+            memcpy(frame, f17, sizeof(frame));
+            return 17;
+            break;
+        case 18:
+            memcpy(frame, f18, sizeof(frame));
+            return 18;
+            break;
+        case 19:
+            memcpy(frame, f19, sizeof(frame));
+            return 19;
+            break;
+        case 20:
+            memcpy(frame, f20, sizeof(frame));
+            return 20;
+            break;
+        case 21:
+            memcpy(frame, f21, sizeof(frame));
+            return 21;
+            break;
+        case 22:
+            memcpy(frame, f22, sizeof(frame));
+            return 22;
+            break;
+        case 23:
+            memcpy(frame, f23, sizeof(frame));
+            return 23;
+            break;
+        case 24:
+            memcpy(frame, f24, sizeof(frame));
+            return 24;
+            break;
+        case 25:
+            memcpy(frame, f25, sizeof(frame));
+            return 25;
+            break;
+        case 26:
+            memcpy(frame, f26, sizeof(frame));
+            return 26;
+            break;
+        case 27:
+            memcpy(frame, f27, sizeof(frame));
+            return 27;
+            break;
+        case 28:
+            memcpy(frame, f28, sizeof(frame));
+            return 28;
+            break;
+        case 29:
+            memcpy(frame, f29, sizeof(frame));
+            return 29;
+            break;
+        case 30:
+            memcpy(frame, f30, sizeof(frame));
+            return 30;
+            break;
+        case 31:
+            memcpy(frame, f31, sizeof(frame));
+            return 31;
+            break;
+        case 32:
+            memcpy(frame, f32, sizeof(frame));
+            return 32;
+            break;
+        case 33:
+            memcpy(frame, f33, sizeof(frame));
+            return 33;
+            break;
+        case 34:
+            memcpy(frame, f34, sizeof(frame));
+            return 34;
+            break;
+        case 35:
+            memcpy(frame, f35, sizeof(frame));
+            return 35;
+            break;
+        default:
+            return 0;
+            break;
+    }
+
+    return 0;
+}
