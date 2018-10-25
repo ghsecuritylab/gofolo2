@@ -76,7 +76,6 @@
 #include "sensorsim.h"
 #include "ble_conn_state.h"
 #include "nrf_ble_gatt.h"
-#include "nrf_ble_qwr.h"
 #include "nrf_pwr_mgmt.h"
 
 #include "nrf_log.h"
@@ -117,7 +116,6 @@
 
 BLE_BAS_DEF(m_bas);                                                             /**< Battery service instance. */
 NRF_BLE_GATT_DEF(m_gatt);
-NRF_BLE_QWR_DEF(m_qwr);                                                         /**< Context for the Queued Write module.*/
 BLE_CUS_DEF(m_cus);                                                             /**< Context for the Queued Write module.*/
 BLE_ADVERTISING_DEF(m_advertising);                                             /**< Advertising module instance. */
 APP_TIMER_DEF(m_notification_timer_id);
@@ -375,18 +373,6 @@ static void gatt_init(void)
 }
 
 
-/**@brief Function for handling Queued Write Module errors.
- *
- * @details A pointer to this function will be passed to each service which may need to inform the
- *          application about an error.
- *
- * @param[in]   nrf_error   Error code containing information about what went wrong.
- */
-static void nrf_qwr_error_handler(uint32_t nrf_error)
-{
-    APP_ERROR_HANDLER(nrf_error);
-}
-
 static void on_cus_evt(ble_cus_t     * p_cus_service,
                        ble_cus_evt_t * p_evt)
 {
@@ -423,7 +409,6 @@ static void on_cus_evt(ble_cus_t     * p_cus_service,
 static void services_init(void)
 {
     ret_code_t         err_code;
-    nrf_ble_qwr_init_t qwr_init = {0};
     ble_cus_init_t     cus_init = {0};
     ble_bas_init_t     bas_init = {0};
 
@@ -438,12 +423,6 @@ static void services_init(void)
     bas_init.initial_batt_level   = 94;
 
     err_code = ble_bas_init(&m_bas, &bas_init);
-    APP_ERROR_CHECK(err_code);
-
-    // Initialize Queued Write Module.
-    qwr_init.error_handler = nrf_qwr_error_handler;
-
-    err_code = nrf_ble_qwr_init(&m_qwr, &qwr_init);
     APP_ERROR_CHECK(err_code);
 
      // Initialize CUS Service init structure to zero.
@@ -595,9 +574,6 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
         case BLE_GAP_EVT_CONNECTED:
             NRF_LOG_INFO("Connected.");
             err_code = bsp_indication_set(BSP_INDICATE_CONNECTED);
-            APP_ERROR_CHECK(err_code);
-            m_conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
-            err_code = nrf_ble_qwr_conn_handle_assign(&m_qwr, m_conn_handle);
             APP_ERROR_CHECK(err_code);
             break;
 
@@ -880,8 +856,3 @@ int main(void)
         idle_state_handle();
     }
 }
-
-
-/**
- * @}
- */
