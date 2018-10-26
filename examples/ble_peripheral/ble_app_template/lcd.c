@@ -33,17 +33,20 @@ static void text_print(void)
 }
 
 void toggle_vcom();
-int select_frame();
+int select_frame(const nrf_lcd_t * p_lcd);
 
 void lcd(void)
 {
+    int f;
     sprintf(test_text1, "====GoFolo====");
-    text_print();
+    //toggle_vcom();
 
     while (1)
     {
-        toggle_vcom();
         nrf_delay_ms(100);
+        f = select_frame(p_lcd);
+        sprintf(test_text1, "%02d==GoFolo====", f);
+        text_print();
     }
 }
 
