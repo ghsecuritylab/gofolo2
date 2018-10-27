@@ -77,10 +77,12 @@
 #include "ble_conn_state.h"
 #include "nrf_ble_gatt.h"
 #include "nrf_pwr_mgmt.h"
+#include "nrf_calendar.h"
 
-#include "nrf_log.h"
-#include "nrf_log_ctrl.h"
-#include "nrf_log_default_backends.h"
+/*#include "nrf_log.h"*/
+/*#include "nrf_log_ctrl.h"*/
+/*#include "nrf_log_default_backends.h"*/
+
 #include "ble_cus.h"
 
 #define DEVICE_NAME                     "GoFolo"                                /**< Name of device. Will be included in the advertising data. */
@@ -119,6 +121,7 @@ NRF_BLE_GATT_DEF(m_gatt);
 BLE_CUS_DEF(m_cus);                                                             /**< Context for the Queued Write module.*/
 BLE_ADVERTISING_DEF(m_advertising);                                             /**< Advertising module instance. */
 APP_TIMER_DEF(m_notification_timer_id);
+APP_TIMER_DEF(m_calendar_timer_id);
 
 static uint16_t m_conn_handle = BLE_CONN_HANDLE_INVALID;                        /**< Handle of the current connection. */
 
@@ -167,15 +170,15 @@ static void pm_evt_handler(pm_evt_t const * p_evt)
     {
         case PM_EVT_BONDED_PEER_CONNECTED:
         {
-            NRF_LOG_INFO("Connected to a previously bonded device.");
+            /*NRF_LOG_INFO("Connected to a previously bonded device.");*/
         } break;
 
         case PM_EVT_CONN_SEC_SUCCEEDED:
         {
-            NRF_LOG_INFO("Connection secured: role: %d, conn_handle: 0x%x, procedure: %d.",
-                         ble_conn_state_role(p_evt->conn_handle),
-                         p_evt->conn_handle,
-                         p_evt->params.conn_sec_succeeded.procedure);
+            /*NRF_LOG_INFO("Connection secured: role: %d, conn_handle: 0x%x, procedure: %d.",*/
+                         /*ble_conn_state_role(p_evt->conn_handle),*/
+                         /*p_evt->conn_handle,*/
+                         /*p_evt->params.conn_sec_succeeded.procedure);*/
         } break;
 
         case PM_EVT_CONN_SEC_FAILED:
@@ -299,19 +302,14 @@ static void battery_level_update(void)
     }
 }
 
-/**@brief Function for handling the Battery measurement timer timeout.
- *
- * @details This function will be called each time the battery level measurement timer expires.
- *
- * @param[in] p_context  Pointer used for passing some arbitrary information (context) from the
- *                       app_start_timer() call to the timeout handler.
- */
 static void battery_level_meas_timeout_handler(void * p_context)
 {
     UNUSED_PARAMETER(p_context);
     if(0)
     battery_level_update();
 }
+
+void calendar_timeout_handler(void * p_context);
 
 /**@brief Function for the Timer initialization.
  *
@@ -327,6 +325,11 @@ static void timers_init(void)
     err_code = app_timer_create(&m_battery_timer_id,
                                 APP_TIMER_MODE_REPEATED,
                                 battery_level_meas_timeout_handler);
+    APP_ERROR_CHECK(err_code);
+
+    err_code = app_timer_create(&m_calendar_timer_id,
+                                APP_TIMER_MODE_REPEATED,
+                                calendar_timeout_handler);
     APP_ERROR_CHECK(err_code);
 }
 
@@ -494,6 +497,8 @@ static void conn_params_init(void)
 /* Battery level measurement interval (ticks). */
 #define BATTERY_LEVEL_MEAS_INTERVAL     APP_TIMER_TICKS(2000)
 
+#define CALENDAR_INTERVAL               APP_TIMER_TICKS(1000)
+
 /**@brief Function for starting timers.
  */
 static void application_timers_start(void)
@@ -502,6 +507,9 @@ static void application_timers_start(void)
 
     // Start application timers.
     err_code = app_timer_start(m_battery_timer_id, BATTERY_LEVEL_MEAS_INTERVAL, NULL);
+    APP_ERROR_CHECK(err_code);
+
+    err_code = app_timer_start(m_calendar_timer_id, CALENDAR_INTERVAL, NULL);
     APP_ERROR_CHECK(err_code);
 }
 
@@ -540,7 +548,7 @@ static void on_adv_evt(ble_adv_evt_t ble_adv_evt)
     switch (ble_adv_evt)
     {
         case BLE_ADV_EVT_FAST:
-            NRF_LOG_INFO("Fast advertising.");
+            //NRF_LOG_INFO("Fast advertising.");
             err_code = bsp_indication_set(BSP_INDICATE_ADVERTISING);
             APP_ERROR_CHECK(err_code);
             break;
@@ -567,19 +575,19 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
     switch (p_ble_evt->header.evt_id)
     {
         case BLE_GAP_EVT_DISCONNECTED:
-            NRF_LOG_INFO("Disconnected.");
+            //NRF_LOG_INFO("Disconnected.");
             // LED indication will be changed when advertising starts.
             break;
 
         case BLE_GAP_EVT_CONNECTED:
-            NRF_LOG_INFO("Connected.");
+            //NRF_LOG_INFO("Connected.");
             err_code = bsp_indication_set(BSP_INDICATE_CONNECTED);
             APP_ERROR_CHECK(err_code);
             break;
 
         case BLE_GAP_EVT_PHY_UPDATE_REQUEST:
         {
-            NRF_LOG_DEBUG("PHY update request.");
+            /*NRF_LOG_DEBUG("PHY update request.");*/
             ble_gap_phys_t const phys =
             {
                 .rx_phys = BLE_GAP_PHY_AUTO,
@@ -591,7 +599,7 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
 
         case BLE_GATTC_EVT_TIMEOUT:
             // Disconnect on GATT Client timeout event.
-            NRF_LOG_DEBUG("GATT Client Timeout.");
+            /*NRF_LOG_DEBUG("GATT Client Timeout.");*/
             err_code = sd_ble_gap_disconnect(p_ble_evt->evt.gattc_evt.conn_handle,
                                              BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
             APP_ERROR_CHECK(err_code);
@@ -599,7 +607,7 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
 
         case BLE_GATTS_EVT_TIMEOUT:
             // Disconnect on GATT Server timeout event.
-            NRF_LOG_DEBUG("GATT Server Timeout.");
+            /*NRF_LOG_DEBUG("GATT Server Timeout.");*/
             err_code = sd_ble_gap_disconnect(p_ble_evt->evt.gatts_evt.conn_handle,
                                              BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
             APP_ERROR_CHECK(err_code);
@@ -678,7 +686,7 @@ static void delete_bonds(void)
 {
     ret_code_t err_code;
 
-    NRF_LOG_INFO("Erase bonds!");
+    //NRF_LOG_INFO("Erase bonds!");
 
     err_code = pm_peers_delete();
     APP_ERROR_CHECK(err_code);
@@ -714,6 +722,7 @@ static void advertising_init(void)
 }
 
 
+#if 0
 /**@brief Function for initializing the nrf log module.
  */
 static void log_init(void)
@@ -723,6 +732,7 @@ static void log_init(void)
 
     NRF_LOG_DEFAULT_BACKENDS_INIT();
 }
+#endif
 
 
 /**@brief Function for initializing power management.
@@ -741,7 +751,8 @@ static void power_management_init(void)
  */
 static void idle_state_handle(void)
 {
-    if (NRF_LOG_PROCESS() == false)
+    //if (NRF_LOG_PROCESS() == false)
+    if (1)
     {
         nrf_pwr_mgmt_run();
     }
@@ -771,7 +782,7 @@ void gfx_initialization(void);
 int main(void)
 {
     // Initialize.
-    log_init();
+    //log_init();
     timers_init();
 
     // LCD init
@@ -786,19 +797,21 @@ int main(void)
     sensor_simulator_init();
     conn_params_init();
     peer_manager_init();
+    nrf_cal_init();
+    nrf_cal_set_time(2018, 10, 27, 13, 44, 0);
 
     // Start execution.
-    NRF_LOG_INFO("=== GoFolo demo ===\n");
+    //NRF_LOG_INFO("=== GoFolo demo ===\n");
 
     application_timers_start();
 
     advertising_start(0);
 
-    lcd();
 
     // Enter main loop.
     for (;;)
     {
+        lcd();
         idle_state_handle();
     }
 }

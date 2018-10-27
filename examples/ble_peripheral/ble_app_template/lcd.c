@@ -5,12 +5,13 @@
 #include "nrf_delay.h"
 #include "boards.h"
 #include "app_error.h"
+#include "nrf_calendar.h"
 #include <string.h>
 
 #define BLACK           0
 #define WHITE           1
 
-static char test_text1[16];
+static char test_text1[20];
 
 extern const nrf_gfx_font_desc_t orkney_8ptFontInfo;
 extern const nrf_lcd_t nrf_lcd_sharp;
@@ -32,21 +33,12 @@ static void text_print(void)
     nrf_gfx_display(p_lcd);
 }
 
-void toggle_vcom();
 int select_frame(const nrf_lcd_t * p_lcd);
 
 void lcd(void)
 {
-    int f;
-    sprintf(test_text1, "====GoFolo====");
-    //toggle_vcom();
-
-    while (1)
-    {
-        nrf_delay_ms(100);
-        f = select_frame(p_lcd);
-        sprintf(test_text1, "%02d==GoFolo====", f);
-        text_print();
-    }
+    select_frame(p_lcd);
+    snprintf(test_text1, 20, "%s", nrf_cal_get_time_string(false));
+    text_print();
 }
 
