@@ -251,6 +251,7 @@ const uint8_t *ptr[10] = {
     f9,
 };
 
+#if 0
 static void sharp_frame_draw(uint16_t x, uint16_t y, uint16_t width, uint16_t height, const uint8_t *f)
 {
     uint16_t i = 0, j = 0, m, n;
@@ -261,6 +262,7 @@ static void sharp_frame_draw(uint16_t x, uint16_t y, uint16_t width, uint16_t he
         }
     }
 }
+#endif
 
 int select_frame(const nrf_lcd_t * p_lcd)
 {
