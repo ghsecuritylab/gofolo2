@@ -3,6 +3,8 @@
 #include "nrf_drv_spi.h"
 #include "nrf_gpio.h"
 #include "frames/frame.h"
+#include "frames/small_arrow_l.h"
+#include "frames/small_arrow_r.h"
 #include "frames/f00.h"
 #include "frames/f10.h"
 #include "frames/f20.h"
@@ -86,6 +88,17 @@ static void sharp_pixel_draw(uint16_t x, uint16_t y, uint32_t color)
         frame[x / 8 + 16 * y] = frame[x / 8 + 16 * y] & ~(1 << (7 - x % 8));
 }
 
+static void sharp_frame_draw(uint16_t x, uint16_t y, uint16_t width, uint16_t height, const uint8_t *f)
+{
+    uint16_t i = 0, j = 0, m, n;
+
+    for(m = 0, i = x; i < height + x; i++, m++) {
+        for(n = 0, j = y; j < width + y; j++, n++) {
+          sharp_pixel_draw(i, j, (f[n * width / 8 + m / 8] >> (7 - m % 8)) & 1);
+        }
+    }
+}
+
 static void sharp_rect_draw(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint32_t color)
 {
     uint16_t i = 0, j = 0;
@@ -102,16 +115,20 @@ static void sharp_rotation_set(nrf_lcd_rotation_t rotation)
 {
     switch (rotation) {
         case NRF_LCD_ROTATE_0:
+            sharp_frame_draw(4, 4, 16, 16, small_arrow_l);
             break;
         case NRF_LCD_ROTATE_90:
             rotate_right(frame, ROWS, COLUMNS);
+            sharp_frame_draw(4, 4, 16, 16, small_arrow_r);
             break;
         case NRF_LCD_ROTATE_180:
             rotate_right(frame, ROWS, COLUMNS);
             rotate_right(frame, ROWS, COLUMNS);
+            sharp_frame_draw(4, 4, 16, 16, small_arrow_l);
             break;
         case NRF_LCD_ROTATE_270:
             rotate_left(frame, ROWS, COLUMNS);
+            sharp_frame_draw(4, 4, 16, 16, small_arrow_r);
             break;
         default:
             break;
@@ -250,19 +267,6 @@ const uint8_t *ptr[10] = {
     f8,
     f9,
 };
-
-#if 0
-static void sharp_frame_draw(uint16_t x, uint16_t y, uint16_t width, uint16_t height, const uint8_t *f)
-{
-    uint16_t i = 0, j = 0, m, n;
-
-    for(m = 0, i = x; i < height + x; i++, m++) {
-        for(n = 0, j = y; j < width + y; j++, n++) {
-          sharp_pixel_draw(i, j, (f[m * width / 8 + n / 8] >> (7 - n % 8) & 1));
-        }
-    }
-}
-#endif
 
 int select_frame(const nrf_lcd_t * p_lcd)
 {

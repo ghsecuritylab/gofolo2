@@ -752,7 +752,7 @@ static void power_management_init(void)
 static void idle_state_handle(void)
 {
     //if (NRF_LOG_PROCESS() == false)
-    if (1)
+    if (0)
     {
         nrf_pwr_mgmt_run();
     }
@@ -798,7 +798,7 @@ int main(void)
     conn_params_init();
     peer_manager_init();
     nrf_cal_init();
-    nrf_cal_set_time(2018, 10, 27, 13, 44, 0);
+    nrf_cal_set_time(2018, 10, 28, 11, 44, 0);
 
     // Start execution.
     //NRF_LOG_INFO("=== GoFolo demo ===\n");
