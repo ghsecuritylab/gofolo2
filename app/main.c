@@ -69,6 +69,7 @@
 #include "nrf_sdh_soc.h"
 #include "nrf_sdh_ble.h"
 #include "app_timer.h"
+#include "app_button.h"
 #include "fds.h"
 #include "peer_manager.h"
 #include "peer_manager_handler.h"
@@ -780,11 +781,48 @@ void show_arrow(void);
 void show_time(void);
 void gfx_initialization(void);
 
+#define BUTTON 6
+
+int st = 0;
+
+static void button_event_handler(uint8_t pin_no, uint8_t button_action)
+{
+    if(pin_no == BUTTON) {
+        switch (button_action)
+        {
+            case APP_BUTTON_PUSH:
+                st = !st;
+                break;
+            case APP_BUTTON_RELEASE:
+                break;
+            case BSP_BUTTON_ACTION_LONG_PUSH:
+                break;
+            default:
+                break;
+        }
+    }
+}
+
+static void buttons_init(void)
+{
+    ret_code_t err_code;
+
+    //The array must be static because a pointer to it will be saved in the button handler module.
+    static app_button_cfg_t buttons[] = { {BUTTON, false, NRF_GPIO_PIN_NOPULL, button_event_handler} };
+
+    err_code = app_button_init(buttons, ARRAY_SIZE(buttons), APP_TIMER_TICKS(50));
+    APP_ERROR_CHECK(err_code);
+
+    err_code = app_button_enable();
+    APP_ERROR_CHECK(err_code);
+}
+
 int main(void)
 {
     // Initialize.
     //log_init();
     timers_init();
+    buttons_init();
 
     // LCD init
     gfx_initialization();
@@ -799,21 +837,23 @@ int main(void)
     conn_params_init();
     peer_manager_init();
     nrf_cal_init();
-    nrf_cal_set_time(2018, 11, 4, 0, 0, 0);
+    nrf_cal_set_time(2018, 11, 4, 23, 45, 20);
 
     // Start execution.
     //NRF_LOG_INFO("=== GoFolo demo ===\n");
 
     application_timers_start();
 
-    advertising_start(0);
-
+    //advertising_start(0);
 
     // Enter main loop.
     for (;;)
     {
-        //show_time();
-        show_arrow();
+        if(st)
+            show_time();
+        else
+            show_arrow();
+
         idle_state_handle();
     }
 }

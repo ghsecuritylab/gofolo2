@@ -58,6 +58,7 @@ SRC_FILES += \
   $(SDK_ROOT)/external/thedotfactory_fonts/orkney8pts.c \
   $(SDK_ROOT)/external/thedotfactory_fonts/ms_sansSerif.c \
   $(SDK_ROOT)/external/thedotfactory_fonts/motorOil.c \
+  $(SDK_ROOT)/external/thedotfactory_fonts/impact.c \
   $(PROJ_DIR)/main.c \
   $(PROJ_DIR)/ble_cus.c \
   $(PROJ_DIR)/lcd.c \
