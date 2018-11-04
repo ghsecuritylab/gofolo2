@@ -776,7 +776,8 @@ static void advertising_start(bool erase_bonds)
     }
 }
 
-void lcd(void);
+void show_arrow(void);
+void show_time(void);
 void gfx_initialization(void);
 
 int main(void)
@@ -798,7 +799,7 @@ int main(void)
     conn_params_init();
     peer_manager_init();
     nrf_cal_init();
-    nrf_cal_set_time(2018, 10, 28, 11, 44, 0);
+    nrf_cal_set_time(2018, 11, 4, 0, 0, 0);
 
     // Start execution.
     //NRF_LOG_INFO("=== GoFolo demo ===\n");
@@ -811,7 +812,8 @@ int main(void)
     // Enter main loop.
     for (;;)
     {
-        lcd();
+        //show_time();
+        show_arrow();
         idle_state_handle();
     }
 }

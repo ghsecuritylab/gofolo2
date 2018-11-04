@@ -56,6 +56,8 @@ SRC_FILES += \
   $(SDK_ROOT)/components/libraries/bsp/bsp_btn_ble.c \
   $(SDK_ROOT)/external/thedotfactory_fonts/orkney24pts.c \
   $(SDK_ROOT)/external/thedotfactory_fonts/orkney8pts.c \
+  $(SDK_ROOT)/external/thedotfactory_fonts/ms_sansSerif.c \
+  $(SDK_ROOT)/external/thedotfactory_fonts/motorOil.c \
   $(PROJ_DIR)/main.c \
   $(PROJ_DIR)/ble_cus.c \
   $(PROJ_DIR)/lcd.c \
@@ -217,7 +219,7 @@ CFLAGS += -DSOFTDEVICE_PRESENT
 CFLAGS += -DSWI_DISABLE0
 CFLAGS += -mcpu=cortex-m4
 CFLAGS += -mthumb -mabi=aapcs
-CFLAGS += -Wall -Werror
+CFLAGS += -Wall
 CFLAGS += -mfloat-abi=soft
 # keep every function in a separate section, this allows linker to discard unused ones
 CFLAGS += -ffunction-sections -fdata-sections -fno-strict-aliasing

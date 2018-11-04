@@ -3,6 +3,21 @@
 #include "nrf_drv_spi.h"
 #include "nrf_gpio.h"
 #include "frames/frame.h"
+
+#include "arrows/arrow_00.h"
+#include "arrows/arrow_01.h"
+#include "arrows/arrow_02.h"
+#include "arrows/arrow_03.h"
+#include "arrows/arrow_04.h"
+#include "arrows/arrow_05.h"
+#include "arrows/arrow_06.h"
+#include "arrows/arrow_07.h"
+#include "arrows/arrow_08.h"
+#include "arrows/arrow_09.h"
+#include "arrows/small_arrow_l.h"
+#include "arrows/small_arrow_r.h"
+
+#if 0
 #include "frames/small_arrow_l.h"
 #include "frames/small_arrow_r.h"
 #include "frames/f00.h"
@@ -15,6 +30,17 @@
 #include "frames/f70.h"
 #include "frames/f80.h"
 #include "frames/f90.h"
+#include "arrows_128/arrow_00.h"
+#include "arrows_128/arrow_01.h"
+#include "arrows_128/arrow_02.h"
+#include "arrows_128/arrow_03.h"
+#include "arrows_128/arrow_04.h"
+#include "arrows_128/arrow_05.h"
+#include "arrows_128/arrow_06.h"
+#include "arrows_128/arrow_07.h"
+#include "arrows_128/arrow_08.h"
+#include "arrows_128/arrow_09.h"
+#endif
 
 #include "nrf_delay.h"
 
@@ -111,24 +137,52 @@ static void sharp_rect_draw(uint16_t x, uint16_t y, uint16_t width, uint16_t hei
     
 }
 
+static void rotate_frame(uint8_t *f, int rows, int cols, nrf_lcd_rotation_t rotation)
+{
+    switch (rotation) {
+        case NRF_LCD_ROTATE_0:
+            sharp_frame_draw(8, 0, 112, 112, f);
+            sharp_frame_draw(1, 0, 24, 24, small_arrow_r);
+            break;
+        case NRF_LCD_ROTATE_90:
+            rotate_right(f, rows, cols);
+            sharp_frame_draw(8, 0, 112, 112, f);
+            sharp_frame_draw(1, 0, 24, 24, small_arrow_l);
+            break;
+        case NRF_LCD_ROTATE_180:
+            rotate_right(f, rows, cols);
+            rotate_right(f, rows, cols);
+            sharp_frame_draw(8, 0, 112, 112, f);
+            sharp_frame_draw(1, 0, 24, 24, small_arrow_r);
+            break;
+        case NRF_LCD_ROTATE_270:
+            rotate_left(f, rows, cols);
+            sharp_frame_draw(8, 0, 112, 112, f);
+            sharp_frame_draw(1, 0, 24, 24, small_arrow_l);
+            break;
+        default:
+            break;
+    }
+}
+
 static void sharp_rotation_set(nrf_lcd_rotation_t rotation)
 {
     switch (rotation) {
         case NRF_LCD_ROTATE_0:
-            sharp_frame_draw(4, 4, 16, 16, small_arrow_l);
+            sharp_frame_draw(1, 0, 24, 24, small_arrow_l);
             break;
         case NRF_LCD_ROTATE_90:
             rotate_right(frame, ROWS, COLUMNS);
-            sharp_frame_draw(4, 4, 16, 16, small_arrow_r);
+            sharp_frame_draw(1, 0, 24, 24, small_arrow_r);
             break;
         case NRF_LCD_ROTATE_180:
             rotate_right(frame, ROWS, COLUMNS);
             rotate_right(frame, ROWS, COLUMNS);
-            sharp_frame_draw(4, 4, 16, 16, small_arrow_l);
+            sharp_frame_draw(1, 0, 24, 24, small_arrow_l);
             break;
         case NRF_LCD_ROTATE_270:
             rotate_left(frame, ROWS, COLUMNS);
-            sharp_frame_draw(4, 4, 16, 16, small_arrow_r);
+            sharp_frame_draw(1, 0, 24, 24, small_arrow_r);
             break;
         default:
             break;
@@ -201,6 +255,7 @@ static void sharp_display(void)
 
 void clear_lcd()
 {
+#if 0
     uint8_t data[2];
 
     data[0] = 4;
@@ -210,6 +265,8 @@ void clear_lcd()
     nrf_gpio_pin_set(LCD_SPI_SS_PIN);
     APP_ERROR_CHECK(nrf_drv_spi_transfer(&spi, data, 2, NULL, 0));
     nrf_gpio_pin_clear(LCD_SPI_SS_PIN); 
+#endif
+    memset(frame, 0xFF, sizeof(frame));
 }
 
 ret_code_t sharp_init(void)
@@ -255,6 +312,7 @@ const nrf_lcd_t nrf_lcd_sharp = {
     .p_lcd_cb = &sharp_cb
 };
 
+#if 0
 const uint8_t *ptr[10] = {
     f0,
     f1,
@@ -267,6 +325,24 @@ const uint8_t *ptr[10] = {
     f8,
     f9,
 };
+#endif
+
+#if 1
+const uint8_t *ptr[10] = {
+    a0,
+    a1,
+    a2,
+    a3,
+    a4,
+    a5,
+    a6,
+    a7,
+    a8,
+    a9,
+};
+#endif
+
+uint8_t arrow[112 * 112 / 8];
 
 int select_frame(const nrf_lcd_t * p_lcd)
 {
@@ -286,9 +362,15 @@ int select_frame(const nrf_lcd_t * p_lcd)
     }
 
     f = (tmp % 10) < 5 ? (tmp / 10) : (tmp / 10 + 1);
-    memcpy(frame, ptr[f], sizeof(frame));
 
+#if 0
+    memcpy(frame, ptr[f], sizeof(frame));
     p_lcd->lcd_rotation_set(r);
+#endif
+
+    memset(frame, 0xFF, sizeof(frame));
+    memcpy(arrow, ptr[f], sizeof(arrow));
+    rotate_frame(arrow, 112, 112, r);
 
     a += 10; if(a == 360) a = 0;
 

@@ -70,7 +70,14 @@ struct tm *nrf_cal_get_time_calibrated(void)
 char *nrf_cal_get_time_string(bool calibrated)
 {
     static char cal_string[80];
-    strftime(cal_string, 80, "       4%Sm   ", (calibrated ? nrf_cal_get_time_calibrated() : nrf_cal_get_time()));
+    strftime(cal_string, 80, " %H:%M", (calibrated ? nrf_cal_get_time_calibrated() : nrf_cal_get_time()));
+    return cal_string;
+}
+ 
+char *get_distance_str(bool calibrated)
+{
+    static char cal_string[80];
+    strftime(cal_string, 80, "4%Sm", (calibrated ? nrf_cal_get_time_calibrated() : nrf_cal_get_time()));
     return cal_string;
 }
  

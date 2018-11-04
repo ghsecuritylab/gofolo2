@@ -40,4 +40,6 @@ struct tm *nrf_cal_get_time_calibrated(void);
 // Returns a string for printing the date and time. Turn the calibration on/off by setting the calibrate parameter. 
 char *nrf_cal_get_time_string(bool calibrated);
 
+char *get_distance_str(bool calibrated);
+
 #endif
