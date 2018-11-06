@@ -783,7 +783,7 @@ void gfx_initialization(void);
 
 #define BUTTON 6
 
-int st = 0;
+int st = 1;
 
 static void button_event_handler(uint8_t pin_no, uint8_t button_action)
 {
@@ -837,7 +837,7 @@ int main(void)
     conn_params_init();
     peer_manager_init();
     nrf_cal_init();
-    nrf_cal_set_time(2018, 11, 4, 23, 45, 20);
+    nrf_cal_set_time(2018, 11, 4, 23, 59, 29);
 
     // Start execution.
     //NRF_LOG_INFO("=== GoFolo demo ===\n");

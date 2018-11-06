@@ -14,11 +14,9 @@
 extern const nrf_lcd_t nrf_lcd_sharp;
 
 /* Font data for Motor Oil 1937 M54 14pt */
-extern const nrf_gfx_font_desc_t orkney_24ptFontInfo;
-extern const nrf_gfx_font_desc_t orkney_8ptFontInfo;
 extern const nrf_gfx_font_desc_t motorOil1937M54_14ptFontInfo;
-extern const nrf_gfx_font_desc_t microsoftSansSerif_14ptFontInfo;
-extern const nrf_gfx_font_desc_t impact_36ptFontInfo;
+extern const nrf_gfx_font_desc_t carson_50ptFontInfo;
+extern const nrf_gfx_font_desc_t roboto_12ptFontInfo;
 
 static const nrf_lcd_t * p_lcd = &nrf_lcd_sharp;
 
@@ -30,12 +28,12 @@ void gfx_initialization(void)
 
 #define A 1
 #define W 127
-#define T 5
+#define T 4
 
 void show_seconds()
 {
     struct tm *t;
-    char s_str[3] = {0};
+    char s_str[32] = {0};
 
     t = nrf_cal_get_time();
 
@@ -57,7 +55,7 @@ void show_seconds()
     } else if(t->tm_sec <= 60) {
         nrf_gfx_line_t a = NRF_GFX_LINE(A, A, W - A, A, T);
         nrf_gfx_line_t b = NRF_GFX_LINE(W - T, A, W - T, W - A, T);
-        nrf_gfx_line_t c = NRF_GFX_LINE(A, W - T, W - A, W - T, 5);
+        nrf_gfx_line_t c = NRF_GFX_LINE(A, W - T, W - A, W - T, T);
         nrf_gfx_line_t d = NRF_GFX_LINE(A, W - (t->tm_sec - 45) * 8, A, W - T, T);
 
         APP_ERROR_CHECK(nrf_gfx_line_draw(p_lcd, &a, 0));
@@ -66,9 +64,13 @@ void show_seconds()
         APP_ERROR_CHECK(nrf_gfx_line_draw(p_lcd, &d, 0));
     }
 
-    nrf_gfx_point_t s = NRF_GFX_POINT(95, 100);
-    snprintf(s_str, 3, "%02d", t->tm_sec);
-    APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &s, 0, s_str, &microsoftSansSerif_14ptFontInfo, true));
+    strftime(s_str, 80, "%D", t);
+    nrf_gfx_point_t s = NRF_GFX_POINT(30, 105);
+    APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &s, 0, s_str, &roboto_12ptFontInfo, true));
+
+    strftime(s_str, 80, "%a", t);
+    nrf_gfx_point_t wk = NRF_GFX_POINT(91, 10);
+    APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &wk, 0, s_str, &roboto_12ptFontInfo, true));
 }
 
 void show_time()
@@ -79,8 +81,8 @@ void show_time()
 
     snprintf(time_str, 20, "%s", nrf_cal_get_time_string(false));
 
-    nrf_gfx_point_t time_point = NRF_GFX_POINT(15, 40);
-    APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &time_point, 0, time_str, &impact_36ptFontInfo, true));
+    nrf_gfx_point_t time_point = NRF_GFX_POINT(8, 20);
+    APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &time_point, 0, time_str, &carson_50ptFontInfo, true));
 
     show_seconds();
 

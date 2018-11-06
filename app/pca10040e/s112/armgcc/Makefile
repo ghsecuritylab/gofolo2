@@ -54,11 +54,9 @@ SRC_FILES += \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_spim.c \
   $(SDK_ROOT)/components/libraries/bsp/bsp.c \
   $(SDK_ROOT)/components/libraries/bsp/bsp_btn_ble.c \
-  $(SDK_ROOT)/external/thedotfactory_fonts/orkney24pts.c \
-  $(SDK_ROOT)/external/thedotfactory_fonts/orkney8pts.c \
-  $(SDK_ROOT)/external/thedotfactory_fonts/ms_sansSerif.c \
-  $(SDK_ROOT)/external/thedotfactory_fonts/motorOil.c \
-  $(SDK_ROOT)/external/thedotfactory_fonts/impact.c \
+  $(SDK_ROOT)/external/thedotfactory_fonts/carson50pts.c \
+  $(SDK_ROOT)/external/thedotfactory_fonts/roboto12pts.c \
+  $(SDK_ROOT)/external/thedotfactory_fonts/motorOil14pts.c \
   $(PROJ_DIR)/main.c \
   $(PROJ_DIR)/ble_cus.c \
   $(PROJ_DIR)/lcd.c \

@@ -69,8 +69,15 @@ struct tm *nrf_cal_get_time_calibrated(void)
 
 char *nrf_cal_get_time_string(bool calibrated)
 {
+    static int st = 0;
     static char cal_string[80];
-    strftime(cal_string, 80, "%H:%M", (calibrated ? nrf_cal_get_time_calibrated() : nrf_cal_get_time()));
+
+    if(st)
+        strftime(cal_string, 80, "%H:|%M", (calibrated ? nrf_cal_get_time_calibrated() : nrf_cal_get_time()));
+    else
+        strftime(cal_string, 80, "%H!|%M", (calibrated ? nrf_cal_get_time_calibrated() : nrf_cal_get_time()));
+
+    st = !st;
     return cal_string;
 }
  
