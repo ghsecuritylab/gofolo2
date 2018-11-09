@@ -79,6 +79,7 @@
 #include "nrf_ble_gatt.h"
 #include "nrf_pwr_mgmt.h"
 #include "nrf_calendar.h"
+#include "nrf_delay.h"
 
 /*#include "nrf_log.h"*/
 /*#include "nrf_log_ctrl.h"*/
@@ -844,7 +845,7 @@ int main(void)
 
     application_timers_start();
 
-    //advertising_start(0);
+    advertising_start(0);
 
     // Enter main loop.
     for (;;)
