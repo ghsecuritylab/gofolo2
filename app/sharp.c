@@ -17,31 +17,6 @@
 #include "arrows/small_arrow_l.h"
 #include "arrows/small_arrow_r.h"
 
-#if 0
-#include "frames/small_arrow_l.h"
-#include "frames/small_arrow_r.h"
-#include "frames/f00.h"
-#include "frames/f10.h"
-#include "frames/f20.h"
-#include "frames/f30.h"
-#include "frames/f40.h"
-#include "frames/f50.h"
-#include "frames/f60.h"
-#include "frames/f70.h"
-#include "frames/f80.h"
-#include "frames/f90.h"
-#include "arrows_128/arrow_00.h"
-#include "arrows_128/arrow_01.h"
-#include "arrows_128/arrow_02.h"
-#include "arrows_128/arrow_03.h"
-#include "arrows_128/arrow_04.h"
-#include "arrows_128/arrow_05.h"
-#include "arrows_128/arrow_06.h"
-#include "arrows_128/arrow_07.h"
-#include "arrows_128/arrow_08.h"
-#include "arrows_128/arrow_09.h"
-#endif
-
 #include "nrf_delay.h"
 
 #define DISP_EN_PIN 20
@@ -189,9 +164,7 @@ static void sharp_rotation_set(nrf_lcd_rotation_t rotation)
     }
 }
 
-static void sharp_display_invert(bool invert)
-{
-}
+static void sharp_display_invert(bool invert) { }
 
 static lcd_cb_t sharp_cb = {
     .height = 128,
@@ -312,21 +285,6 @@ const nrf_lcd_t nrf_lcd_sharp = {
     .p_lcd_cb = &sharp_cb
 };
 
-#if 0
-const uint8_t *ptr[10] = {
-    f0,
-    f1,
-    f2,
-    f3,
-    f4,
-    f5,
-    f6,
-    f7,
-    f8,
-    f9,
-};
-#endif
-
 #if 1
 const uint8_t *ptr[10] = {
     a0,
@@ -344,20 +302,19 @@ const uint8_t *ptr[10] = {
 
 uint8_t arrow[112 * 112 / 8];
 
-int select_frame(const nrf_lcd_t * p_lcd)
+int select_frame(const nrf_lcd_t * p_lcd, int ang)
 {
     uint8_t f;
     uint16_t tmp = 0;
-    static uint16_t a = 0;
     nrf_lcd_rotation_t r = NRF_LCD_ROTATE_0;
 
-    tmp = a;
+    tmp = ang;
 
-    if(a > 90 && a <= 180) {
+    if(ang > 90 && ang <= 180) {
         r = NRF_LCD_ROTATE_90; tmp -= 90;
-    } else if(a > 180 && a <= 270) {
+    } else if(ang > 180 && ang <= 270) {
         r = NRF_LCD_ROTATE_180; tmp -= 180;
-    } else if(a > 270 && a <= 360) {
+    } else if(ang > 270 && ang <= 360) {
         r = NRF_LCD_ROTATE_270; tmp -= 270;
     }
 
@@ -371,8 +328,6 @@ int select_frame(const nrf_lcd_t * p_lcd)
     memset(frame, 0xFF, sizeof(frame));
     memcpy(arrow, ptr[f], sizeof(arrow));
     rotate_frame(arrow, 112, 112, r);
-
-    a += 10; if(a == 360) a = 0;
 
     return f;
 }

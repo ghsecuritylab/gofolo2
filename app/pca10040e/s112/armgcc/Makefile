@@ -46,12 +46,14 @@ SRC_FILES += \
   $(SDK_ROOT)/components/boards/boards.c \
   $(SDK_ROOT)/integration/nrfx/legacy/nrf_drv_clock.c \
   $(SDK_ROOT)/integration/nrfx/legacy/nrf_drv_spi.c \
+  $(SDK_ROOT)/integration/nrfx/legacy/nrf_drv_twi.c\
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_clock.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_gpiote.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_power_clock.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/prs/nrfx_prs.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_spi.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_spim.c \
+  $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_twim.c \
   $(SDK_ROOT)/components/libraries/bsp/bsp.c \
   $(SDK_ROOT)/components/libraries/bsp/bsp_btn_ble.c \
   $(SDK_ROOT)/external/thedotfactory_fonts/carson50pts.c \
@@ -62,6 +64,7 @@ SRC_FILES += \
   $(PROJ_DIR)/lcd.c \
   $(PROJ_DIR)/sharp.c \
   $(PROJ_DIR)/nrf_calendar.c \
+  $(PROJ_DIR)/imu.c \
   $(SDK_ROOT)/components/libraries/gfx/nrf_gfx.c \
   $(SDK_ROOT)/components/ble/ble_services/ble_bas/ble_bas.c \
   $(SDK_ROOT)/external/segger_rtt/SEGGER_RTT.c \

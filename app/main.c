@@ -1,56 +1,3 @@
-/**
- * Copyright (c) 2014 - 2018, Nordic Semiconductor ASA
- *
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
- *
- * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form, except as embedded into a Nordic
- *    Semiconductor ASA integrated circuit in a product or a software update for
- *    such product, must reproduce the above copyright notice, this list of
- *    conditions and the following disclaimer in the documentation and/or other
- *    materials provided with the distribution.
- *
- * 3. Neither the name of Nordic Semiconductor ASA nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * 4. This software, with or without modification, must only be used with a
- *    Nordic Semiconductor ASA integrated circuit.
- *
- * 5. Any software provided in binary form under this license must not be reverse
- *    engineered, decompiled, modified and/or disassembled.
- *
- * THIS SOFTWARE IS PROVIDED BY NORDIC SEMICONDUCTOR ASA "AS IS" AND ANY EXPRESS
- * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL NORDIC SEMICONDUCTOR ASA OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
- * GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
- * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- */
-/** @file
- *
- * @defgroup ble_sdk_app_template_main main.c
- * @{
- * @ingroup ble_sdk_app_template
- * @brief Template project main file.
- *
- * This file contains a template for creating a new application. It has the code necessary to wakeup
- * from button, advertise, get a connection restart advertising on disconnect and if no new
- * connection created go back to system-off mode.
- * It can easily be used as a starting point for creating a new application, the comments identified
- * with 'YOUR_JOB' indicates where and how you can customize.
- */
-
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
@@ -79,11 +26,7 @@
 #include "nrf_ble_gatt.h"
 #include "nrf_pwr_mgmt.h"
 #include "nrf_calendar.h"
-#include "nrf_delay.h"
-
-/*#include "nrf_log.h"*/
-/*#include "nrf_log_ctrl.h"*/
-/*#include "nrf_log_default_backends.h"*/
+#include "imu.h"
 
 #include "ble_cus.h"
 
@@ -116,7 +59,6 @@
 #define SEC_PARAM_MAX_KEY_SIZE          16                                      /**< Maximum encryption key size. */
 
 #define DEAD_BEEF                       0xDEADBEEF                              /**< Value used as error code on stack dump, can be used to identify stack location on stack unwind. */
-
 
 BLE_BAS_DEF(m_bas);                                                             /**< Battery service instance. */
 NRF_BLE_GATT_DEF(m_gatt);
@@ -723,20 +665,6 @@ static void advertising_init(void)
     ble_advertising_conn_cfg_tag_set(&m_advertising, APP_BLE_CONN_CFG_TAG);
 }
 
-
-#if 0
-/**@brief Function for initializing the nrf log module.
- */
-static void log_init(void)
-{
-    ret_code_t err_code = NRF_LOG_INIT(NULL);
-    APP_ERROR_CHECK(err_code);
-
-    NRF_LOG_DEFAULT_BACKENDS_INIT();
-}
-#endif
-
-
 /**@brief Function for initializing power management.
  */
 static void power_management_init(void)
@@ -821,7 +749,6 @@ static void buttons_init(void)
 int main(void)
 {
     // Initialize.
-    //log_init();
     timers_init();
     buttons_init();
 
@@ -838,10 +765,9 @@ int main(void)
     conn_params_init();
     peer_manager_init();
     nrf_cal_init();
-    nrf_cal_set_time(2018, 11, 4, 23, 59, 29);
+    twi_master_init();
 
-    // Start execution.
-    //NRF_LOG_INFO("=== GoFolo demo ===\n");
+    nrf_cal_set_time(2018, 11, 4, 23, 59, 29);
 
     application_timers_start();
 

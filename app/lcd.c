@@ -1,12 +1,13 @@
+#include <string.h>
 #include "nrf_gfx.h"
-//#include "nrf52_dk.h"
 #include "app_util_platform.h"
 #include "nrf_gpio.h"
 #include "nrf_delay.h"
 #include "boards.h"
 #include "app_error.h"
 #include "nrf_calendar.h"
-#include <string.h>
+#include "imu.h"
+#include "math.h"
 
 #define BLACK           0
 #define WHITE           1
@@ -90,21 +91,49 @@ void show_time()
     nrf_delay_ms(1000);
 }
 
-void show_distance(void)
+void show_distance(int ang)
 {
     char distance_str[20];
 
-    snprintf(distance_str, 20, "%s", get_distance_str(false));
+    snprintf(distance_str, 20, "%d", ang);
     nrf_gfx_point_t distance_point = NRF_GFX_POINT(35, 128 - 15);
     APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &distance_point, 0, distance_str, &motorOil1937M54_14ptFontInfo, true));
     nrf_gfx_display(p_lcd);
 }
 
-int select_frame(const nrf_lcd_t * p_lcd);
+int select_frame(const nrf_lcd_t * p_lcd, int ang);
+
+#define M_PI 3.14159265358979323846264338327950288
+int get_heading()
+{
+    int16_t d[3];
+    uint8_t val[6];
+    double heading = 0;
+
+    i2c_read(0x28, &val[0], 6);
+
+    d[0] = val[1]; d[0] <<= 8;
+    d[1] = val[3]; d[1] <<= 8;
+    d[2] = val[5]; d[2] <<= 8;
+
+    d[0] |= val[0];
+    d[1] |= val[2];
+    d[2] |= val[4];
+
+    d[0] = -d[0];
+    //d[1] = -d[1];
+
+    heading = 180 * atan2(d[1], d[0])/M_PI;
+    if(heading < 0)
+        heading += 360;
+
+    return (int)heading;
+}
 
 void show_arrow(void)
 {
-    select_frame(p_lcd);
-    show_distance();
+    int ang = get_heading();
+    select_frame(p_lcd, ang);
+    show_distance(ang);
     nrf_delay_ms(200);
 }
