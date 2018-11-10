@@ -1,0 +1,2 @@
+
+./JLinkGDBServer -If SWD -Speed 4000 -Device Cortex-M4
