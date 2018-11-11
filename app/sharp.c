@@ -197,7 +197,7 @@ void toggle_vcom()
     while(i == 2) {
         vcom[0] = ((1 & (i / 2)) << 1);
         nrf_gpio_pin_set(LCD_SPI_SS_PIN); 
-        nrf_delay_ms(5000);
+        nrf_delay_ms(100);
         APP_ERROR_CHECK(nrf_drv_spi_transfer(&spi, vcom, 2, NULL, 0));
         nrf_gpio_pin_clear(LCD_SPI_SS_PIN); 
         i++;

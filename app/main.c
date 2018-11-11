@@ -26,7 +26,9 @@
 #include "nrf_ble_gatt.h"
 #include "nrf_pwr_mgmt.h"
 #include "nrf_calendar.h"
+#include "nrf_delay.h"
 #include "imu.h"
+#include "lcd.h"
 
 #include "ble_cus.h"
 
@@ -681,7 +683,6 @@ static void power_management_init(void)
  */
 static void idle_state_handle(void)
 {
-    //if (NRF_LOG_PROCESS() == false)
     if (0)
     {
         nrf_pwr_mgmt_run();
@@ -706,13 +707,9 @@ static void advertising_start(bool erase_bonds)
     }
 }
 
-void show_arrow(void);
-void show_time(void);
-void gfx_initialization(void);
-
 #define BUTTON 6
 
-int st = 1;
+int st = 0;
 
 static void button_event_handler(uint8_t pin_no, uint8_t button_action)
 {
@@ -776,11 +773,14 @@ int main(void)
     // Enter main loop.
     for (;;)
     {
+#if 1
         if(st)
             show_time();
         else
             show_arrow();
+#endif
 
         idle_state_handle();
+        nrf_delay_ms(10);
     }
 }

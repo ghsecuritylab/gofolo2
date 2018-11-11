@@ -6,6 +6,7 @@
 #include "boards.h"
 #include "nrf_log.h"
 #include "ble_bas.h"
+#include "lcd.h"
 
 extern ble_bas_t m_bas;
 
@@ -49,15 +50,17 @@ static void on_disconnect(ble_cus_t * p_cus, ble_evt_t const * p_ble_evt)
  */
 static void on_write(ble_cus_t * p_cus, ble_evt_t const * p_ble_evt)
 {
+    int i = 0;
+    char buff[100];
     ble_gatts_evt_write_t const * p_evt_write = &p_ble_evt->evt.gatts_evt.params.write;
 
     // Custom Value Characteristic Written to.
     if (p_evt_write->handle == p_cus->custom_value_handles.value_handle)
     {
-        uint8_t battery_level = p_evt_write->data[0];
+        for(i = 0; i < p_evt_write->len; ++i)
+            sprintf(buff + i * 3, "%02x ", p_evt_write->data[i]);
 
-        NRF_LOG_INFO("### WRITE 0x%02x\r\n", p_evt_write->data[0]);
-        ble_bas_battery_level_update(&m_bas, battery_level, BLE_CONN_HANDLE_ALL);
+        lcd_print(10, buff);
     }
 }
 
@@ -139,7 +142,7 @@ static uint32_t custom_value_char_add(ble_cus_t * p_cus, const ble_cus_init_t * 
     attr_char_value.p_attr_md = &attr_md;
     attr_char_value.init_len  = sizeof(uint8_t);
     attr_char_value.init_offs = 0;
-    attr_char_value.max_len   = sizeof(uint8_t);
+    attr_char_value.max_len   = 32;
 
     err_code = sd_ble_gatts_characteristic_add(p_cus->service_handle, &char_md,
                                                &attr_char_value,

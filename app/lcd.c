@@ -8,6 +8,7 @@
 #include "nrf_calendar.h"
 #include "imu.h"
 #include "math.h"
+#include "lcd.h"
 
 #define BLACK           0
 #define WHITE           1
@@ -136,4 +137,17 @@ void show_arrow(void)
     select_frame(p_lcd, ang);
     show_distance(ang);
     nrf_delay_ms(200);
+}
+
+void lcd_flush()
+{
+    nrf_gfx_display(p_lcd);
+}
+
+void lcd_print(int y, char *st)
+{
+    clear_lcd();
+    nrf_gfx_point_t wk = NRF_GFX_POINT(10, y);
+    APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &wk, 0, st, &roboto_12ptFontInfo, true));
+    nrf_gfx_display(p_lcd);
 }
