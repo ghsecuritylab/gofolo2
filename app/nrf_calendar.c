@@ -22,9 +22,9 @@ void nrf_cal_init(void)
 {
 }
 
+static time_t uncal_difftime, diff_time, newtime;
 void nrf_cal_set_time(uint32_t year, uint32_t month, uint32_t day, uint32_t hour, uint32_t minute, uint32_t second)
 {
-    static time_t uncal_difftime, difftime, newtime;
     time_struct.tm_year = year - 1900;
     time_struct.tm_mon = month;
     time_struct.tm_mday = day;
@@ -36,9 +36,25 @@ void nrf_cal_set_time(uint32_t year, uint32_t month, uint32_t day, uint32_t hour
     // Calculate the calibration offset 
     if(m_last_calibrate_time != 0)
     {
-        difftime = newtime - m_last_calibrate_time;
+        diff_time = newtime - m_last_calibrate_time;
         uncal_difftime = m_time - m_last_calibrate_time;
-        m_calibrate_factor = (float)difftime / (float)uncal_difftime;
+        m_calibrate_factor = (float)diff_time / (float)uncal_difftime;
+    }
+    
+    // Assign the new time to the local time variables
+    m_time = m_last_calibrate_time = newtime;
+}    
+
+void nrf_cal_set_time_raw(time_t secs_since_epoch)
+{
+    newtime = secs_since_epoch;
+    
+    // Calculate the calibration offset 
+    if(m_last_calibrate_time != 0)
+    {
+        diff_time = newtime - m_last_calibrate_time;
+        uncal_difftime = m_time - m_last_calibrate_time;
+        m_calibrate_factor = (float)diff_time / (float)uncal_difftime;
     }
     
     // Assign the new time to the local time variables

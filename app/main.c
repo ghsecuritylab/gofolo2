@@ -773,14 +773,12 @@ int main(void)
     // Enter main loop.
     for (;;)
     {
-#if 1
         if(st)
-            show_time();
-        else
             show_arrow();
-#endif
+        else
+            show_time();
 
         idle_state_handle();
-        nrf_delay_ms(10);
+        nrf_delay_ms(100);
     }
 }

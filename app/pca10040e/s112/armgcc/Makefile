@@ -62,6 +62,7 @@ SRC_FILES += \
   $(PROJ_DIR)/main.c \
   $(PROJ_DIR)/ble_cus.c \
   $(PROJ_DIR)/lcd.c \
+  $(PROJ_DIR)/proto.c \
   $(PROJ_DIR)/sharp.c \
   $(PROJ_DIR)/nrf_calendar.c \
   $(PROJ_DIR)/imu.c \

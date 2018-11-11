@@ -96,8 +96,8 @@ void show_distance(int ang)
 {
     char distance_str[20];
 
-    snprintf(distance_str, 20, "%d", ang);
-    nrf_gfx_point_t distance_point = NRF_GFX_POINT(35, 128 - 15);
+    snprintf(distance_str, 20, "%dm", ang);
+    nrf_gfx_point_t distance_point = NRF_GFX_POINT(45, 128 - 20);
     APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &distance_point, 0, distance_str, &motorOil1937M54_14ptFontInfo, true));
     nrf_gfx_display(p_lcd);
 }

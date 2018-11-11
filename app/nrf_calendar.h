@@ -29,6 +29,7 @@ void nrf_cal_set_callback(void (*callback)(void), uint32_t interval);
 // last call to the set time function. To ensure good calibration this function should not be called too often 
 // (depending on the accuracy of the 32 kHz clock it should be sufficient to call it between once a week and once a month). 
 void nrf_cal_set_time(uint32_t year, uint32_t month, uint32_t day, uint32_t hour, uint32_t minute, uint32_t second);
+void nrf_cal_set_time_raw(time_t secs_since_epoch);
 
 // Returns the uncalibrated time as a tm struct. For more information about the tm struct and the time.h library in general please refer to:
 // http://www.tutorialspoint.com/c_standard_library/time_h.htm

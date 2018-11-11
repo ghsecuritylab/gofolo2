@@ -7,6 +7,7 @@
 #include "nrf_log.h"
 #include "ble_bas.h"
 #include "lcd.h"
+#include "proto.h"
 
 extern ble_bas_t m_bas;
 
@@ -50,17 +51,12 @@ static void on_disconnect(ble_cus_t * p_cus, ble_evt_t const * p_ble_evt)
  */
 static void on_write(ble_cus_t * p_cus, ble_evt_t const * p_ble_evt)
 {
-    int i = 0;
-    char buff[100];
     ble_gatts_evt_write_t const * p_evt_write = &p_ble_evt->evt.gatts_evt.params.write;
 
     // Custom Value Characteristic Written to.
     if (p_evt_write->handle == p_cus->custom_value_handles.value_handle)
     {
-        for(i = 0; i < p_evt_write->len; ++i)
-            sprintf(buff + i * 3, "%02x ", p_evt_write->data[i]);
-
-        lcd_print(10, buff);
+        data_handler(p_evt_write->len, p_evt_write->data);
     }
 }
 
