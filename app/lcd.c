@@ -108,7 +108,7 @@ int select_frame(const nrf_lcd_t * p_lcd, int ang);
 int get_heading()
 {
     int16_t d[3];
-    uint8_t val[6];
+    uint8_t val[6] = {0};
     double heading = 0;
 
     i2c_read(0x28, &val[0], 6);

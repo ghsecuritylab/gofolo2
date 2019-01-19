@@ -19,15 +19,10 @@
 
 #include "nrf_delay.h"
 
-#define DISP_EN_PIN 20
-#define LCD_SPI_SS_PIN 28
-#define LCD_SPI_SCK_PIN 4
-#define LCD_SPI_MOSI_PIN 5
-
 #define COLUMNS 128
 #define ROWS 128
 
-static const nrf_drv_spi_t spi = NRF_DRV_SPI_INSTANCE(0);
+static const nrf_drv_spi_t spi = NRF_DRV_SPI_INSTANCE(PCB_SPI_INSTANCE);
 
 static void bytes_swap(uint8_t *a, uint8_t *b, int ai, int bi)
 {

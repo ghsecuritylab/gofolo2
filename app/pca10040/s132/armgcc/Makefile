@@ -46,17 +46,29 @@ SRC_FILES += \
   $(SDK_ROOT)/components/boards/boards.c \
   $(SDK_ROOT)/integration/nrfx/legacy/nrf_drv_clock.c \
   $(SDK_ROOT)/integration/nrfx/legacy/nrf_drv_uart.c \
+  $(SDK_ROOT)/integration/nrfx/legacy/nrf_drv_spi.c \
+  $(SDK_ROOT)/integration/nrfx/legacy/nrf_drv_twi.c\
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_clock.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_gpiote.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_power_clock.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/prs/nrfx_prs.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_uart.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_uarte.c \
+  $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_spim.c \
+  $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_twi.c \
   $(SDK_ROOT)/components/libraries/bsp/bsp.c \
   $(SDK_ROOT)/components/libraries/bsp/bsp_btn_ble.c \
+  $(SDK_ROOT)/external/thedotfactory_fonts/carson50pts.c \
+  $(SDK_ROOT)/external/thedotfactory_fonts/roboto12pts.c \
+  $(SDK_ROOT)/external/thedotfactory_fonts/motorOil14pts.c \
   $(PROJ_DIR)/main.c \
   $(PROJ_DIR)/ble_cus.c \
+  $(PROJ_DIR)/lcd.c \
+  $(PROJ_DIR)/proto.c \
+  $(PROJ_DIR)/sharp.c \
   $(PROJ_DIR)/nrf_calendar.c \
+  $(PROJ_DIR)/imu.c \
+  $(SDK_ROOT)/components/libraries/gfx/nrf_gfx.c \
   $(SDK_ROOT)/components/ble/ble_services/ble_bas/ble_bas.c \
   $(SDK_ROOT)/external/segger_rtt/SEGGER_RTT.c \
   $(SDK_ROOT)/external/segger_rtt/SEGGER_RTT_Syscalls_GCC.c \
@@ -219,17 +231,28 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/nfc/ndef/conn_hand_parser/ac_rec_parser \
   $(SDK_ROOT)/components/libraries/stack_guard \
   $(SDK_ROOT)/components/libraries/log/src \
+  $(SDK_ROOT)/external/thedotfactory_fonts \
 
 # Libraries common to all targets
 LIB_FILES += \
 
 # Optimization flags
-OPT = -O3 -g3
+OPT = -Os
 # Uncomment the line below to enable link time optimization
-#OPT += -flto
+OPT += -flto
 
 # C flags common to all targets
 CFLAGS += $(OPT)
+CFLAGS += -DBUTTON=11
+CFLAGS += -DTWI_SDA_M=19
+CFLAGS += -DTWI_SCL_M=20
+CFLAGS += -DGPIO_SDO_AG=18
+CFLAGS += -DGPIO_SDO_M=17
+CFLAGS += -DDISP_EN_PIN=4
+CFLAGS += -DLCD_SPI_SS_PIN=5
+CFLAGS += -DLCD_SPI_SCK_PIN=7
+CFLAGS += -DLCD_SPI_MOSI_PIN=6
+CFLAGS += -DPCB_SPI_INSTANCE=1
 CFLAGS += -DBOARD_PCA10040
 CFLAGS += -DCONFIG_GPIO_AS_PINRESET
 CFLAGS += -DFLOAT_ABI_HARD

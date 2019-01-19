@@ -5,14 +5,8 @@
 #include "app_error.h"
 #include "nrf_drv_twi.h"
 
-#define TWI_SDA_M 9
-#define TWI_SCL_M 10
-
 #define IMU_MAG_ADDR 0x1C
 #define IMU_GYRO_ADDR 0x6a
-
-#define GPIO_SDO_AG 12
-#define GPIO_SDO_M 14
 
 static const nrf_drv_twi_t m_twi_master = NRF_DRV_TWI_INSTANCE(0);
 

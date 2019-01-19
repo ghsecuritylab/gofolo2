@@ -62,6 +62,7 @@
 
 #define DEAD_BEEF                       0xDEADBEEF                              /**< Value used as error code on stack dump, can be used to identify stack location on stack unwind. */
 
+int st = 1;
 BLE_BAS_DEF(m_bas);                                                             /**< Battery service instance. */
 NRF_BLE_GATT_DEF(m_gatt);
 BLE_CUS_DEF(m_cus);                                                             /**< Context for the Queued Write module.*/
@@ -80,7 +81,6 @@ static ble_uuid_t m_adv_uuids[] =                                               
 {
     {BLE_UUID_DEVICE_INFORMATION_SERVICE, BLE_UUID_TYPE_BLE}
 };
-
 
 static void advertising_start(bool erase_bonds);
 
@@ -468,12 +468,14 @@ static void sleep_mode_enter(void)
 {
     ret_code_t err_code;
 
+#if 0
     err_code = bsp_indication_set(BSP_INDICATE_IDLE);
     APP_ERROR_CHECK(err_code);
 
     // Prepare wakeup buttons.
     err_code = bsp_btn_ble_sleep_mode_prepare();
     APP_ERROR_CHECK(err_code);
+#endif
 
     // Go to system-off mode (this function will not return; wakeup will cause a reset).
     err_code = sd_power_system_off();
@@ -677,6 +679,7 @@ static void power_management_init(void)
 }
 
 
+#if 0
 /**@brief Function for handling the idle state (main loop).
  *
  * @details If there is no pending log operation, then sleep until next the next event occurs.
@@ -688,7 +691,7 @@ static void idle_state_handle(void)
         nrf_pwr_mgmt_run();
     }
 }
-
+#endif
 
 /**@brief Function for starting advertising.
  */
@@ -706,10 +709,6 @@ static void advertising_start(bool erase_bonds)
         APP_ERROR_CHECK(err_code);
     }
 }
-
-#define BUTTON 6
-
-int st = 0;
 
 static void button_event_handler(uint8_t pin_no, uint8_t button_action)
 {
@@ -745,6 +744,7 @@ static void buttons_init(void)
 
 int main(void)
 {
+    int i = 0;
     // Initialize.
     timers_init();
     buttons_init();
@@ -773,12 +773,16 @@ int main(void)
     // Enter main loop.
     for (;;)
     {
-        if(st)
-            show_arrow();
-        else
-            show_time();
+        if (i++ > 100) {
+            nrf_gpio_pin_clear(DISP_EN_PIN);
+            sleep_mode_enter();
+        } else {
+            if(st)
+                show_arrow();
+            else
+                show_time();
+        }
 
-        idle_state_handle();
         nrf_delay_ms(100);
     }
 }
