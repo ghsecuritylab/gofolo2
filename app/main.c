@@ -773,7 +773,7 @@ int main(void)
     // Enter main loop.
     for (;;)
     {
-        if (i++ > 100) {
+        if (i++ > 10000) {
             nrf_gpio_pin_clear(DISP_EN_PIN);
             sleep_mode_enter();
         } else {

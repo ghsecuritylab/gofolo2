@@ -1,80 +1,73 @@
 #include "sdk_common.h"
+#include "math.h"
 #include "nrf_lcd.h"
 #include "nrf_drv_spi.h"
 #include "nrf_gpio.h"
 #include "frames/frame.h"
 
 #include "arrows/arrow_00.h"
-#include "arrows/arrow_01.h"
-#include "arrows/arrow_02.h"
-#include "arrows/arrow_03.h"
-#include "arrows/arrow_04.h"
-#include "arrows/arrow_05.h"
-#include "arrows/arrow_06.h"
-#include "arrows/arrow_07.h"
-#include "arrows/arrow_08.h"
-#include "arrows/arrow_09.h"
 #include "arrows/small_arrow_l.h"
 #include "arrows/small_arrow_r.h"
 
 #include "nrf_delay.h"
 
-#define COLUMNS 128
-#define ROWS 128
+
+#define ARROW_S 112
+uint8_t arrow[ARROW_S  * ARROW_S / 8];
+
+#define M_PI 3.14159265358979323846264338327950288
+
+#define M_GET_BYTE(a, i, j) (a[(i) * ARROW_S / 8 + (j) / 8])
+#define M_GET_BIT(a, i, j) ((M_GET_BYTE((a), (i), (j)) >> (7 - (j) % 8)) & 1)
+#define M_SET_BIT(a, i, j, v) (M_GET_BYTE((a), (i), (j)) = (M_GET_BYTE((a), (i), (j)) & ~(1 << (7 - (j) % 8))) | ((v) << (7 - (j) % 8)))
+
+void rotate_matrix(int degree)
+{ 
+    int i,j, ii, jj, v;
+    float x0, y0, x1, y1, r;
+
+    // Rotation center
+    x0 = y0 = ARROW_S / 2 - 1; 
+
+    memset(arrow, 0xFF, sizeof(arrow));
+    r = degree * M_PI / 180;
+    for(i = 0; i < ARROW_S; ++i) {
+        for(j = 0; j < ARROW_S; ++j) {
+            x1 = cosf(r) * (j - x0) - sinf(r) * (i - y0) + x0;
+            y1 = sinf(r) * (j - x0) + cosf(r) * (i - y0) + y0;
+
+            ii = round(y1);
+            jj = round(x1);
+
+            if(ii >= 0 && ii < ARROW_S && jj >= 0 && jj < ARROW_S)
+                M_SET_BIT(arrow, ii, jj, M_GET_BIT(a0, i, j));
+        }
+    }
+
+#if 1
+    // anti-aliasing
+    for(i = 0; i < ARROW_S; ++i) {
+        for(j = 0; j < ARROW_S; ++j) {
+            if(M_GET_BIT(arrow, i, j)) {
+                if(i > 0 && i < ARROW_S - 1 && j > 0 && j < ARROW_S - 1)
+                    v = round((float)(
+                                M_GET_BIT(arrow, i, j) + 
+                                M_GET_BIT(arrow, i + 1, j) +
+                                M_GET_BIT(arrow, i - 1, j) +
+                                M_GET_BIT(arrow, i + 1, j + 1) +
+                                M_GET_BIT(arrow, i - 1, j + 1) +
+                                M_GET_BIT(arrow, i + 1, j - 1) +
+                                M_GET_BIT(arrow, i - 1, j - 1) +
+                                M_GET_BIT(arrow, i, j - 1) +
+                                M_GET_BIT(arrow, i, j + 1)) / 9.0);
+                M_SET_BIT(arrow, i, j, v);
+            }
+        }
+    }
+#endif
+}
 
 static const nrf_drv_spi_t spi = NRF_DRV_SPI_INSTANCE(PCB_SPI_INSTANCE);
-
-static void bytes_swap(uint8_t *a, uint8_t *b, int ai, int bi)
-{
-    uint8_t tmpa, tmpb;
-
-    ai = 7 - ai;
-    bi = 7 - bi;
-
-    tmpa = ((*a >> ai) & 1);
-    tmpb = ((*b >> bi) & 1);
-
-    *a = (*a & ~(1 << ai)) | (tmpb << ai);
-    *b = (*b & ~(1 << bi)) | (tmpa << bi);
-}
-
-static void reverse_columns(uint8_t *bitarr, int X, int Y)
-{ 
-    int i, j, k;
-
-    for (i = 0; i < Y; i++) 
-        for (j = 0, k = Y - 1; j < k; j++, k--) 
-            bytes_swap(&bitarr[j * Y / 8 + i / 8], &bitarr[k * Y / 8 + i / 8], i % 8, i % 8);
-} 
-
-static void reverse_rows(uint8_t *bitarr, int X, int Y) 
-{ 
-    int i, j, k;
-
-    for (i = 0; i < X; i++) 
-        for (j = 0, k = Y - 1; j < k; j++, k--) 
-            bytes_swap(&bitarr[i * Y / 8 + j / 8], &bitarr[i * Y / 8 + k / 8], j % 8, k % 8);
-} 
-  
-static void transpose(uint8_t *bitarr, int X, int Y)
-{ 
-    int i, j;
-    for (i = 0; i < X; i++) 
-        for (j = i; j < Y; j++) 
-            bytes_swap(&bitarr[i * Y / 8 + j / 8], &bitarr[j * Y / 8 + i / 8], j % 8, i % 8);
-}
-
-static void rotate_left(uint8_t *m, int x, int y)
-{ 
-    transpose(m, x, y); 
-    reverse_columns(m, x, y); 
-} 
-
-static void rotate_right(uint8_t *m, int x, int y)
-{ 
-    transpose(m, x, y); 
-    reverse_rows(m, x, y); 
-} 
 
 static void sharp_pixel_draw(uint16_t x, uint16_t y, uint32_t color)
 {
@@ -107,52 +100,16 @@ static void sharp_rect_draw(uint16_t x, uint16_t y, uint16_t width, uint16_t hei
     
 }
 
-static void rotate_frame(uint8_t *f, int rows, int cols, nrf_lcd_rotation_t rotation)
-{
-    switch (rotation) {
-        case NRF_LCD_ROTATE_0:
-            sharp_frame_draw(8, 0, 112, 112, f);
-            sharp_frame_draw(1, 0, 24, 24, small_arrow_r);
-            break;
-        case NRF_LCD_ROTATE_90:
-            rotate_right(f, rows, cols);
-            sharp_frame_draw(8, 0, 112, 112, f);
-            sharp_frame_draw(1, 0, 24, 24, small_arrow_l);
-            break;
-        case NRF_LCD_ROTATE_180:
-            rotate_right(f, rows, cols);
-            rotate_right(f, rows, cols);
-            sharp_frame_draw(8, 0, 112, 112, f);
-            sharp_frame_draw(1, 0, 24, 24, small_arrow_r);
-            break;
-        case NRF_LCD_ROTATE_270:
-            rotate_left(f, rows, cols);
-            sharp_frame_draw(8, 0, 112, 112, f);
-            sharp_frame_draw(1, 0, 24, 24, small_arrow_l);
-            break;
-        default:
-            break;
-    }
-}
-
 static void sharp_rotation_set(nrf_lcd_rotation_t rotation)
 {
     switch (rotation) {
         case NRF_LCD_ROTATE_0:
-            sharp_frame_draw(1, 0, 24, 24, small_arrow_l);
             break;
         case NRF_LCD_ROTATE_90:
-            rotate_right(frame, ROWS, COLUMNS);
-            sharp_frame_draw(1, 0, 24, 24, small_arrow_r);
             break;
         case NRF_LCD_ROTATE_180:
-            rotate_right(frame, ROWS, COLUMNS);
-            rotate_right(frame, ROWS, COLUMNS);
-            sharp_frame_draw(1, 0, 24, 24, small_arrow_l);
             break;
         case NRF_LCD_ROTATE_270:
-            rotate_left(frame, ROWS, COLUMNS);
-            sharp_frame_draw(1, 0, 24, 24, small_arrow_r);
             break;
         default:
             break;
@@ -280,49 +237,14 @@ const nrf_lcd_t nrf_lcd_sharp = {
     .p_lcd_cb = &sharp_cb
 };
 
-#if 1
-const uint8_t *ptr[10] = {
-    a0,
-    a1,
-    a2,
-    a3,
-    a4,
-    a5,
-    a6,
-    a7,
-    a8,
-    a9,
-};
-#endif
-
-uint8_t arrow[112 * 112 / 8];
-
 int select_frame(const nrf_lcd_t * p_lcd, int ang)
 {
-    uint8_t f;
-    uint16_t tmp = 0;
-    nrf_lcd_rotation_t r = NRF_LCD_ROTATE_0;
-
-    tmp = ang;
-
-    if(ang > 90 && ang <= 180) {
-        r = NRF_LCD_ROTATE_90; tmp -= 90;
-    } else if(ang > 180 && ang <= 270) {
-        r = NRF_LCD_ROTATE_180; tmp -= 180;
-    } else if(ang > 270 && ang <= 360) {
-        r = NRF_LCD_ROTATE_270; tmp -= 270;
-    }
-
-    f = (tmp % 10) < 5 ? (tmp / 10) : (tmp / 10 + 1);
-
-#if 0
-    memcpy(frame, ptr[f], sizeof(frame));
-    p_lcd->lcd_rotation_set(r);
-#endif
-
     memset(frame, 0xFF, sizeof(frame));
-    memcpy(arrow, ptr[f], sizeof(arrow));
-    rotate_frame(arrow, 112, 112, r);
 
-    return f;
+    rotate_matrix(ang);
+
+    sharp_frame_draw(8, 0, 112, 112, arrow);
+    sharp_frame_draw(1, 0, 24, 24, small_arrow_l);
+
+    return 0;
 }
