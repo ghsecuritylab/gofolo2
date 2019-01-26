@@ -9,14 +9,16 @@
 #include "imu.h"
 #include "math.h"
 #include "lcd.h"
+#include "proto.h"
 
 #define A 1
 #define W 127
 #define T 4
 
-#define BLACK           0
-#define WHITE           1
+#define BLACK 0
+#define WHITE 1
 
+extern nav_t nav;
 extern int failed;
 extern const nrf_lcd_t nrf_lcd_sharp;
 int select_frame(const nrf_lcd_t * p_lcd, int ang);
@@ -106,16 +108,13 @@ void show_distance(int ang, int tc_ang)
 
 void show_arrow(void)
 {
-    double heading = 0;
-    double ang;
-
-    ang = get_heading(&heading);
+    int ang = roundf(get_direction());
     if(failed > 0)
         select_frame(p_lcd, 90);
     else 
-        select_frame(p_lcd, 360 - heading);
+        select_frame(p_lcd, 360 - ang);
 
-    show_distance((int)round(ang), (int)round(heading));
+    show_distance(ang, nav.dir);
 }
 
 void lcd_flush()

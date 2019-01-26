@@ -6,10 +6,12 @@
 #include "app_error.h"
 #include "nrf_drv_twi.h"
 #include "lsm9ds1.h"
+#include "proto.h"
 
 #define ENV_OFFSET 170
 #define M_PI 3.14159265358979323846264338327950288
 
+extern nav_t nav;
 int failed = 0;
 static const nrf_drv_twi_t m_twi_master = NRF_DRV_TWI_INSTANCE(0);
 
@@ -148,9 +150,9 @@ ret_code_t twi_master_init(void)
     return ret;
 }
 
-double get_heading(double * heading)
+float get_direction()
 {
-    float c_heading;
+    float dir;
     int16_t magRaw[3];
     int16_t accRaw[3];
 
@@ -163,12 +165,14 @@ double get_heading(double * heading)
     //accRaw[0] = -accRaw[0];
     //accRaw[1] = -accRaw[1];
 
+#if 0
     //Compute heading
-    *heading = 180 * atan2(magRaw[1], magRaw[0]) / M_PI + ENV_OFFSET;
+    heading = 180 * atan2(magRaw[1], magRaw[0]) / M_PI + ENV_OFFSET;
 
     //Convert heading to 0 - 360
-    if(*heading < 0)
-        *heading += 360;
+    if(heading < 0)
+        heading += 360;
+#endif
 
     //Normalize accelerometer raw values.
     accXnorm = accRaw[0] / sqrt(accRaw[0] * accRaw[0] + accRaw[1] * accRaw[1] + accRaw[2] * accRaw[2]);
@@ -184,11 +188,17 @@ double get_heading(double * heading)
         cos(roll) + magRaw[2] * sin(roll) * cos(pitch);
 
     //Calculate heading
-    c_heading = 180 * atan2(magYcomp, magXcomp) / M_PI + ENV_OFFSET;
+    dir = 180 * atan2(magYcomp, magXcomp) / M_PI + ENV_OFFSET;
 
     //Convert heading to 0 - 360
-    if(c_heading < 0)
-        c_heading += 360;
+    if(dir < 0)
+        dir += 360;
 
-    return c_heading;
+    // Deviation from the North
+    dir += nav.dir;
+    if(dir > 360)
+        dir -= 360;
+
+
+    return dir;
 }

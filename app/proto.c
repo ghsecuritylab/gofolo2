@@ -34,6 +34,21 @@
 #include <string.h>
 #include "nrf_calendar.h"
 #include "lcd.h"
+#include "proto.h"
+
+uint8_t nav_next = 0;
+uint16_t nav_dir = 0;
+
+nav_t nav = { 0 };
+
+uint16_t ntohs(uint16_t const net) 
+{
+    uint8_t data[2] = { 0 };
+    memcpy(&data, &net, sizeof(data));
+
+    return ((uint16_t) data[1] << 0)
+        | ((uint16_t) data[0] << 8);
+}
 
 uint32_t ntohl(uint32_t const net) 
 {
@@ -45,44 +60,6 @@ uint32_t ntohl(uint32_t const net)
         | ((uint32_t) data[1] << 16)
         | ((uint32_t) data[0] << 24);
 }
-
-typedef struct __attribute__((__packed__)) cfg_s {
-    uint32_t date;
-    uint8_t unit;
-} cfg_t;
-
-typedef struct __attribute__((__packed__)) firm_s {
-    uint32_t len;
-    uint8_t data[0];
-} firm_t;
-
-typedef struct __attribute__((__packed__)) nav_s {
-    uint16_t dir;
-    uint8_t next;
-    uint32_t met;
-    uint32_t dist;
-    uint32_t cov;
-} nav_t;
-
-typedef struct __attribute__((__packed__)) packet_s {
-    uint8_t cmd;
-    union {
-        cfg_t cfg;
-        nav_t nav;
-        firm_t firm;
-    } p;
-} packet_t;
-
-enum {
-    CMD_CLOCK_MDOE,
-    CMD_NAV_MODE,
-    CMD_DETAILED,
-    CMD_CFG,
-    CMD_START,
-    CMD_STOP,
-    CMD_NAV,
-    CMD_UPGRADE,
-};
 
 extern int st;
 
@@ -103,7 +80,7 @@ void data_handler(int len, const uint8_t *p)
             st = 1;
             break;
         case CMD_DETAILED:
-            st = 1;
+            st = 2;
             break;
         case CMD_CFG:
             nrf_cal_set_time_raw(ntohl(pkt->p.cfg.date));
@@ -113,6 +90,11 @@ void data_handler(int len, const uint8_t *p)
         case CMD_STOP:
             break;
         case CMD_NAV:
+            nav.next = pkt->p.nav.next;
+            nav.dir = pkt->p.nav.dir;
+            nav.dist = ntohl(pkt->p.nav.dist);
+            nav.met = ntohl(pkt->p.nav.met);
+            nav.cov = ntohl(pkt->p.nav.cov);
             break;
         case CMD_UPGRADE:
             break;

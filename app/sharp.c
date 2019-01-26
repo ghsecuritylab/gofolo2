@@ -10,19 +10,19 @@
 #include "arrows/small_arrow_r.h"
 
 #include "nrf_delay.h"
-
+#include "proto.h"
 
 #define ARROW_S 112
-uint8_t arrow[ARROW_S  * ARROW_S / 8];
-
 #define M_PI 3.14159265358979323846264338327950288
-
 #define M_GET_BYTE(a, i, j) (a[(i) * ARROW_S / 8 + (j) / 8])
 #define M_GET_BIT(a, i, j) ((M_GET_BYTE((a), (i), (j)) >> (7 - (j) % 8)) & 1)
 #define M_SET_BIT(a, i, j, v) (M_GET_BYTE((a), (i), (j)) = (M_GET_BYTE((a), (i), (j)) & ~(1 << (7 - (j) % 8))) | ((v) << (7 - (j) % 8)))
 
+extern nav_t nav;
+
 static float fastsinf[360];
 static float fastcosf[360];
+static uint8_t arrow[ARROW_S  * ARROW_S / 8];
 
 void init_fast_sin_cos()
 {
@@ -261,7 +261,17 @@ int select_frame(const nrf_lcd_t * p_lcd, int ang)
     rotate_matrix(ang);
 
     sharp_frame_draw(8, 0, 112, 112, arrow);
-    sharp_frame_draw(1, 0, 24, 24, small_arrow_l);
+
+    switch(nav.next){
+        case 1:
+            sharp_frame_draw(1, 0, 24, 24, small_arrow_l);
+            break;
+        case 2:
+            sharp_frame_draw(1, 0, 24, 24, small_arrow_r);
+            break;
+        default:
+            break;
+    }
 
     return 0;
 }
