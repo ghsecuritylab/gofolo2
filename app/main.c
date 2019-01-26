@@ -744,7 +744,6 @@ static void buttons_init(void)
 
 int main(void)
 {
-    int i = 0;
     // Initialize.
     timers_init();
     buttons_init();
@@ -773,16 +772,11 @@ int main(void)
     // Enter main loop.
     for (;;)
     {
-        if (i++ > 10000) {
-            nrf_gpio_pin_clear(DISP_EN_PIN);
-            sleep_mode_enter();
-        } else {
-            if(st)
-                show_arrow();
-            else
-                show_time();
-        }
+        if(st)
+            show_arrow();
+        else
+            show_time();
 
-        nrf_delay_ms(100);
+        //nrf_delay_ms(200);
     }
 }

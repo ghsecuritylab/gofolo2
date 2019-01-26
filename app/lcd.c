@@ -10,10 +10,16 @@
 #include "math.h"
 #include "lcd.h"
 
+#define A 1
+#define W 127
+#define T 4
+
 #define BLACK           0
 #define WHITE           1
 
+extern int failed;
 extern const nrf_lcd_t nrf_lcd_sharp;
+int select_frame(const nrf_lcd_t * p_lcd, int ang);
 
 /* Font data for Motor Oil 1937 M54 14pt */
 extern const nrf_gfx_font_desc_t motorOil1937M54_14ptFontInfo;
@@ -27,10 +33,6 @@ void gfx_initialization(void)
 {
     APP_ERROR_CHECK(nrf_gfx_init(p_lcd));
 }
-
-#define A 1
-#define W 127
-#define T 4
 
 void show_seconds()
 {
@@ -92,51 +94,28 @@ void show_time()
     nrf_delay_ms(1000);
 }
 
-void show_distance(int ang)
+void show_distance(int ang, int tc_ang)
 {
     char distance_str[20];
 
-    snprintf(distance_str, 20, "%dm", ang);
+    snprintf(distance_str, 20, "%d %d", ang, tc_ang);
     nrf_gfx_point_t distance_point = NRF_GFX_POINT(45, 128 - 20);
-    APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &distance_point, 0, distance_str, &motorOil1937M54_14ptFontInfo, true));
+    APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &distance_point, 0, distance_str, &roboto_12ptFontInfo, true));
     nrf_gfx_display(p_lcd);
-}
-
-int select_frame(const nrf_lcd_t * p_lcd, int ang);
-
-#define M_PI 3.14159265358979323846264338327950288
-int get_heading()
-{
-    int16_t d[3];
-    uint8_t val[6] = {0};
-    double heading = 0;
-
-    i2c_read(0x28, &val[0], 6);
-
-    d[0] = val[1]; d[0] <<= 8;
-    d[1] = val[3]; d[1] <<= 8;
-    d[2] = val[5]; d[2] <<= 8;
-
-    d[0] |= val[0];
-    d[1] |= val[2];
-    d[2] |= val[4];
-
-    d[0] = -d[0];
-    //d[1] = -d[1];
-
-    heading = 180 * atan2(d[1], d[0])/M_PI;
-    if(heading < 0)
-        heading += 360;
-
-    return (int)heading;
 }
 
 void show_arrow(void)
 {
-    int ang = get_heading();
-    select_frame(p_lcd, ang);
-    show_distance(ang);
-    nrf_delay_ms(200);
+    double heading = 0;
+    double ang;
+
+    ang = get_heading(&heading);
+    if(failed > 0)
+        select_frame(p_lcd, 90);
+    else 
+        select_frame(p_lcd, 360 - heading);
+
+    show_distance((int)round(ang), (int)round(heading));
 }
 
 void lcd_flush()
