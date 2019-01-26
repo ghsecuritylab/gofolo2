@@ -21,20 +21,34 @@ uint8_t arrow[ARROW_S  * ARROW_S / 8];
 #define M_GET_BIT(a, i, j) ((M_GET_BYTE((a), (i), (j)) >> (7 - (j) % 8)) & 1)
 #define M_SET_BIT(a, i, j, v) (M_GET_BYTE((a), (i), (j)) = (M_GET_BYTE((a), (i), (j)) & ~(1 << (7 - (j) % 8))) | ((v) << (7 - (j) % 8)))
 
+static float fastsinf[360];
+static float fastcosf[360];
+
+void init_fast_sin_cos()
+{
+    int i;
+    for(i = 1; i < 360; ++i) {
+        fastsinf[i] = sinf(i * M_PI / 180);
+        fastcosf[i] = cosf(i * M_PI / 180);
+    }
+}
+
 void rotate_matrix(int degree)
 { 
     int i,j, ii, jj, v;
-    float x0, y0, x1, y1, r;
+    float x0, y0, x1, y1;
+
+    if(degree == 0 || degree == 360)
+        return;
 
     // Rotation center
     x0 = y0 = ARROW_S / 2 - 1; 
 
     memset(arrow, 0xFF, sizeof(arrow));
-    r = degree * M_PI / 180;
     for(i = 0; i < ARROW_S; ++i) {
         for(j = 0; j < ARROW_S; ++j) {
-            x1 = cosf(r) * (j - x0) - sinf(r) * (i - y0) + x0;
-            y1 = sinf(r) * (j - x0) + cosf(r) * (i - y0) + y0;
+            x1 = fastcosf[degree] * (j - x0) - fastsinf[degree] * (i - y0) + x0;
+            y1 = fastsinf[degree] * (j - x0) + fastcosf[degree] * (i - y0) + y0;
 
             ii = round(y1);
             jj = round(x1);
@@ -213,6 +227,9 @@ ret_code_t sharp_init(void)
     spi_config.bit_order = NRF_DRV_SPI_BIT_ORDER_LSB_FIRST;
 
     err_code = nrf_drv_spi_init(&spi, &spi_config, NULL, NULL);
+
+    // Init lookup table for fast cosf() sinf() calculations.
+    init_fast_sin_cos();
 
     clear_lcd();
     nrf_delay_ms(1000);
