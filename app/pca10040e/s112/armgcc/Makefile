@@ -59,6 +59,7 @@ SRC_FILES += \
   $(SDK_ROOT)/external/thedotfactory_fonts/carson50pts.c \
   $(SDK_ROOT)/external/thedotfactory_fonts/roboto12pts.c \
   $(SDK_ROOT)/external/thedotfactory_fonts/motorOil14pts.c \
+  $(SDK_ROOT)/external/thedotfactory_fonts/orkney8pts.c \
   $(PROJ_DIR)/main.c \
   $(PROJ_DIR)/ble_cus.c \
   $(PROJ_DIR)/lcd.c \

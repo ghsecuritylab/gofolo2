@@ -150,6 +150,8 @@ ret_code_t twi_master_init(void)
     return ret;
 }
 
+int heading = 0;
+
 float get_direction()
 {
     float dir;
@@ -194,6 +196,7 @@ float get_direction()
     if(dir < 0)
         dir += 360;
 
+    heading = dir;
     // Deviation from the North
     dir += nav.dir;
     if(dir > 360)

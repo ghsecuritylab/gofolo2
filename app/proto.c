@@ -92,9 +92,9 @@ void data_handler(int len, const uint8_t *p)
         case CMD_NAV:
             nav.next = pkt->p.nav.next;
             nav.dir = pkt->p.nav.dir;
-            nav.dist = ntohl(pkt->p.nav.dist);
-            nav.met = ntohl(pkt->p.nav.met);
-            nav.cov = ntohl(pkt->p.nav.cov);
+            nav.dist = pkt->p.nav.dist;
+            nav.met = pkt->p.nav.met;
+            nav.cov = pkt->p.nav.cov;
             break;
         case CMD_UPGRADE:
             break;

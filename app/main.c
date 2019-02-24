@@ -32,6 +32,11 @@
 
 #include "ble_cus.h"
 
+#ifdef LCD_LED_PIN
+#include "app_pwm.h"
+APP_PWM_INSTANCE(PWM1,1);
+#endif
+
 #define DEVICE_NAME                     "GoFolo"                                /**< Name of device. Will be included in the advertising data. */
 #define MANUFACTURER_NAME               "GoFolo_Team"                           /**< Manufacturer. Will be passed to Device Information Service. */
 #define APP_ADV_INTERVAL                300                                     /**< The advertising interval (in units of 0.625 ms. This value corresponds to 187.5 ms). */
@@ -769,14 +774,36 @@ int main(void)
 
     advertising_start(0);
 
+#ifdef LCD_LED_PIN
+    int value;
+    /* 1-channel PWM, 200Hz, output on DK LED pins. */
+    app_pwm_config_t pwm1_cfg = APP_PWM_DEFAULT_CONFIG_1CH(500L, LCD_LED_PIN);
+
+    /* Switch the polarity of the second channel. */
+    pwm1_cfg.pin_polarity[0] = APP_PWM_POLARITY_ACTIVE_HIGH;
+
+    /* Initialize and enable PWM. */
+    ret_code_t err_code;
+    err_code = app_pwm_init(&PWM1,&pwm1_cfg, NULL);
+    APP_ERROR_CHECK(err_code);
+    app_pwm_enable(&PWM1);
+#endif
+
     // Enter main loop.
     for (;;)
     {
-        if(st)
-            show_arrow();
-        else
-            show_time();
+        for (uint8_t i = 0; i < 40; ++i)
+        {
+            if(st)
+                show_arrow();
+            else
+                show_time();
 
-        //nrf_delay_ms(200);
+#ifdef LCD_LED_PIN
+            value = (i < 20) ? (i * 5) : (100 - (i - 20) * 5);
+            /* Set the duty cycle - keep trying until PWM is ready... */
+            while (app_pwm_channel_duty_set(&PWM1, 0, value) == NRF_ERROR_BUSY);
+#endif
+        }
     }
 }

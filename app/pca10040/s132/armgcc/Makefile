@@ -21,6 +21,7 @@ SRC_FILES += \
   $(SDK_ROOT)/components/libraries/util/app_error.c \
   $(SDK_ROOT)/components/libraries/util/app_error_handler_gcc.c \
   $(SDK_ROOT)/components/libraries/util/app_error_weak.c \
+  $(SDK_ROOT)/components/libraries/pwm/app_pwm.c \
   $(SDK_ROOT)/components/libraries/scheduler/app_scheduler.c \
   $(SDK_ROOT)/components/libraries/timer/app_timer.c \
   $(SDK_ROOT)/components/libraries/util/app_util_platform.c \
@@ -41,6 +42,7 @@ SRC_FILES += \
   $(SDK_ROOT)/components/libraries/ringbuf/nrf_ringbuf.c \
   $(SDK_ROOT)/components/libraries/experimental_section_vars/nrf_section_iter.c \
   $(SDK_ROOT)/components/libraries/strerror/nrf_strerror.c \
+  $(SDK_ROOT)/integration/nrfx/legacy/nrf_drv_ppi.c \
   $(SDK_ROOT)/components/libraries/sensorsim/sensorsim.c \
   $(SDK_ROOT)/modules/nrfx/mdk/system_nrf52.c \
   $(SDK_ROOT)/components/boards/boards.c \
@@ -50,6 +52,8 @@ SRC_FILES += \
   $(SDK_ROOT)/integration/nrfx/legacy/nrf_drv_twi.c\
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_clock.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_gpiote.c \
+  $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_ppi.c \
+  $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_timer.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_power_clock.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/prs/nrfx_prs.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_uart.c \
@@ -61,6 +65,7 @@ SRC_FILES += \
   $(SDK_ROOT)/external/thedotfactory_fonts/carson50pts.c \
   $(SDK_ROOT)/external/thedotfactory_fonts/roboto12pts.c \
   $(SDK_ROOT)/external/thedotfactory_fonts/motorOil14pts.c \
+  $(SDK_ROOT)/external/thedotfactory_fonts/orkney8pts.c \
   $(PROJ_DIR)/main.c \
   $(PROJ_DIR)/ble_cus.c \
   $(PROJ_DIR)/lcd.c \
@@ -243,6 +248,7 @@ OPT += -flto
 
 # C flags common to all targets
 CFLAGS += $(OPT)
+CFLAGS += -DLCD_LED_PIN=8
 CFLAGS += -DBUTTON=11
 CFLAGS += -DTWI_SDA_M=19
 CFLAGS += -DTWI_SCL_M=20

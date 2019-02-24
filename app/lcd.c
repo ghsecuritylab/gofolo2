@@ -27,6 +27,7 @@ int select_frame(const nrf_lcd_t * p_lcd, int ang);
 extern const nrf_gfx_font_desc_t motorOil1937M54_14ptFontInfo;
 extern const nrf_gfx_font_desc_t carson_50ptFontInfo;
 extern const nrf_gfx_font_desc_t roboto_12ptFontInfo;
+extern const nrf_gfx_font_desc_t orkney_8ptFontInfo;
 
 static const nrf_lcd_t * p_lcd = &nrf_lcd_sharp;
 
@@ -96,13 +97,31 @@ void show_time()
     nrf_delay_ms(1000);
 }
 
-void show_distance(int ang, int tc_ang)
+extern int heading;
+void show_distance(int ang)
 {
     char distance_str[20];
 
-    snprintf(distance_str, 20, "%d %d", ang, tc_ang);
+    snprintf(distance_str, 20, "N:%d", heading);
     nrf_gfx_point_t distance_point = NRF_GFX_POINT(45, 128 - 20);
-    APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &distance_point, 0, distance_str, &roboto_12ptFontInfo, true));
+    APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &distance_point, 0, distance_str, &orkney_8ptFontInfo, true));
+
+    snprintf(distance_str, 20, "C:%lu", nav.cov);
+    nrf_gfx_point_t distance_point1 = NRF_GFX_POINT(90, 128 - 40);
+    APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &distance_point1, 0, distance_str, &orkney_8ptFontInfo, true));
+
+    snprintf(distance_str, 20, "M:%lu", nav.met);
+    nrf_gfx_point_t distance_point2 = NRF_GFX_POINT(0, 128 - 40);
+    APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &distance_point2, 0, distance_str, &orkney_8ptFontInfo, true));
+
+    snprintf(distance_str, 20, "Dr:%d", nav.dir);
+    nrf_gfx_point_t distance_point3 = NRF_GFX_POINT(0, 128 - 20);
+    APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &distance_point3, 0, distance_str, &orkney_8ptFontInfo, true));
+
+    snprintf(distance_str, 20, "D:%lu", nav.dist);
+    nrf_gfx_point_t distance_point4 = NRF_GFX_POINT(90, 128 - 20);
+    APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &distance_point4, 0, distance_str, &orkney_8ptFontInfo, true));
+
     nrf_gfx_display(p_lcd);
 }
 
@@ -114,7 +133,7 @@ void show_arrow(void)
     else 
         select_frame(p_lcd, 360 - ang);
 
-    show_distance(ang, nav.dir);
+    show_distance(ang);
 }
 
 void lcd_flush()
