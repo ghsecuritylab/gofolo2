@@ -29,6 +29,7 @@
 #include "nrf_delay.h"
 #include "imu.h"
 #include "lcd.h"
+#include "proto.h"
 
 #include "ble_cus.h"
 
@@ -747,6 +748,7 @@ static void buttons_init(void)
     APP_ERROR_CHECK(err_code);
 }
 
+extern nav_t nav;
 int main(void)
 {
     // Initialize.
@@ -775,7 +777,6 @@ int main(void)
     advertising_start(0);
 
 #ifdef LCD_LED_PIN
-    int value;
     /* 1-channel PWM, 200Hz, output on DK LED pins. */
     app_pwm_config_t pwm1_cfg = APP_PWM_DEFAULT_CONFIG_1CH(500L, LCD_LED_PIN);
 
@@ -787,6 +788,9 @@ int main(void)
     err_code = app_pwm_init(&PWM1,&pwm1_cfg, NULL);
     APP_ERROR_CHECK(err_code);
     app_pwm_enable(&PWM1);
+
+    /* Set the duty cycle - keep trying until PWM is ready... */
+    while (app_pwm_channel_duty_set(&PWM1, 0, 2) == NRF_ERROR_BUSY);
 #endif
 
     // Enter main loop.
@@ -798,12 +802,6 @@ int main(void)
                 show_arrow();
             else
                 show_time();
-
-#ifdef LCD_LED_PIN
-            value = (i < 20) ? (i * 5) : (100 - (i - 20) * 5);
-            /* Set the duty cycle - keep trying until PWM is ready... */
-            while (app_pwm_channel_duty_set(&PWM1, 0, value) == NRF_ERROR_BUSY);
-#endif
         }
     }
 }

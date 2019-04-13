@@ -128,12 +128,64 @@ void show_distance(int ang)
 void show_arrow(void)
 {
     int ang = roundf(get_direction());
+#if 0
     if(failed > 0)
         select_frame(p_lcd, 90);
     else 
         select_frame(p_lcd, 360 - ang);
 
     show_distance(ang);
+#endif
+}
+
+void debug2(int16_t m[], int16_t n[])
+{
+    char distance_str[20];
+
+    snprintf(distance_str, 20, "X:%d", m[0]);
+    nrf_gfx_point_t distance_point = NRF_GFX_POINT(0, 128 - 20);
+    APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &distance_point, 0, distance_str, &orkney_8ptFontInfo, true));
+
+    snprintf(distance_str, 20, "Y:%d", m[1]);
+    nrf_gfx_point_t distance_point1 = NRF_GFX_POINT(0, 128 - 40);
+    APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &distance_point1, 0, distance_str, &orkney_8ptFontInfo, true));
+
+    snprintf(distance_str, 20, "Z:%d", m[2]);
+    nrf_gfx_point_t distance_point2 = NRF_GFX_POINT(0, 128 - 60);
+    APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &distance_point2, 0, distance_str, &orkney_8ptFontInfo, true));
+
+    snprintf(distance_str, 20, "X:%d", n[0]);
+    nrf_gfx_point_t distance_point3 = NRF_GFX_POINT(60, 128 - 20);
+    APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &distance_point3, 0, distance_str, &orkney_8ptFontInfo, true));
+
+    snprintf(distance_str, 20, "Y:%d", n[1]);
+    nrf_gfx_point_t distance_point4 = NRF_GFX_POINT(60, 128 - 40);
+    APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &distance_point4, 0, distance_str, &orkney_8ptFontInfo, true));
+
+    snprintf(distance_str, 20, "Z:%d", n[2]);
+    nrf_gfx_point_t distance_point5 = NRF_GFX_POINT(60, 128 - 60);
+    APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &distance_point5, 0, distance_str, &orkney_8ptFontInfo, true));
+
+    nrf_gfx_display(p_lcd);
+}
+
+void debug(int16_t m[])
+{
+    char distance_str[20];
+
+    snprintf(distance_str, 20, "X:%d", m[0]);
+    nrf_gfx_point_t distance_point = NRF_GFX_POINT(45, 128 - 20);
+    APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &distance_point, 0, distance_str, &orkney_8ptFontInfo, true));
+
+    snprintf(distance_str, 20, "Y:%d", m[1]);
+    nrf_gfx_point_t distance_point3 = NRF_GFX_POINT(0, 128 - 20);
+    APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &distance_point3, 0, distance_str, &orkney_8ptFontInfo, true));
+
+    snprintf(distance_str, 20, "Z:%d", m[2]);
+    nrf_gfx_point_t distance_point4 = NRF_GFX_POINT(90, 128 - 20);
+    APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &distance_point4, 0, distance_str, &orkney_8ptFontInfo, true));
+
+    nrf_gfx_display(p_lcd);
 }
 
 void lcd_flush()
