@@ -156,8 +156,29 @@ int16_t max[3] = { -32767, -32767, -32767};
 int heading = 0;
 
 void clear_lcd();
-void debug(int16_t m[3]);
 void debug2(int16_t m[3], int16_t n[3]);
+
+// Calibration
+void calibrate(void)
+{
+    int16_t magRaw[3];
+    clear_lcd();
+
+    readMAG(magRaw);
+
+    if (magRaw[0] > max[0]) max[0] = magRaw[0];
+    if (magRaw[1] > max[1]) max[1] = magRaw[1];
+    if (magRaw[2] > max[2]) max[2] = magRaw[2];
+
+    if (magRaw[0] < min[0]) min[0] = magRaw[0];
+    if (magRaw[1] < min[1]) min[1] = magRaw[1];
+    if (magRaw[2] < min[2]) min[2] = magRaw[2];
+
+    debug2(max, min);
+
+    return;
+}
+
 float get_direction()
 {
     float dir;
@@ -166,23 +187,12 @@ float get_direction()
 
     float accXnorm,accYnorm,pitch,roll,magXcomp,magYcomp;
 
-    // Calibration
-    {
-        clear_lcd();
-        readMAG(magRaw);
-
-        if (magRaw[0] > max[0]) max[0] = magRaw[0];
-        if (magRaw[1] > max[1]) max[1] = magRaw[1];
-        if (magRaw[2] > max[2]) max[2] = magRaw[2];
-
-        if (magRaw[0] < min[0]) min[0] = magRaw[0];
-        if (magRaw[1] < min[1]) min[1] = magRaw[1];
-        if (magRaw[2] < min[2]) min[2] = magRaw[2];
-    }
-
-    debug2(max, min);
-    return 0;
     readMAG(magRaw);
+
+    magRaw[0] -= (min[0] + max[0]) /2 ;
+    magRaw[1] -= (min[1] + max[1]) /2 ;
+    magRaw[2] -= (min[2] + max[2]) /2 ;
+
     readACC(accRaw);
 
     //If your IMU is upside down, comment out the two lines below which will correct the tilt calculation

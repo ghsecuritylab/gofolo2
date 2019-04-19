@@ -749,6 +749,7 @@ static void buttons_init(void)
 }
 
 extern nav_t nav;
+void calibrate(void);
 int main(void)
 {
     // Initialize.
@@ -801,7 +802,8 @@ int main(void)
             if(st)
                 show_arrow();
             else
-                show_time();
+                calibrate();
+                //show_time();
         }
     }
 }
