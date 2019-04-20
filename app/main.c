@@ -749,7 +749,7 @@ static void buttons_init(void)
 }
 
 extern nav_t nav;
-void calibrate(void);
+int calibrate(void);
 int main(void)
 {
     // Initialize.
@@ -794,6 +794,9 @@ int main(void)
     while (app_pwm_channel_duty_set(&PWM1, 0, 2) == NRF_ERROR_BUSY);
 #endif
 
+    /* Sart calibration */
+    while(calibrate());
+
     // Enter main loop.
     for (;;)
     {
@@ -802,8 +805,7 @@ int main(void)
             if(st)
                 show_arrow();
             else
-                calibrate();
-                //show_time();
+                show_time();
         }
     }
 }

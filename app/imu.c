@@ -1,14 +1,15 @@
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 #include <math.h>
 
 #include "nrf_gpio.h"
+#include "nrf_delay.h"
 #include "app_error.h"
 #include "nrf_drv_twi.h"
 #include "lsm9ds1.h"
 #include "proto.h"
 
-#define ENV_OFFSET 170
 #define M_PI 3.14159265358979323846264338327950288
 
 extern nav_t nav;
@@ -153,16 +154,38 @@ ret_code_t twi_master_init(void)
 int16_t min[3] = {  32767,  32767,  32767};
 int16_t max[3] = { -32767, -32767, -32767};
 
-int heading = 0;
+int16_t acc_prev[3] = { 0, 0, 0};
+int16_t min_prev[3] = {  32767,  32767,  32767};
+int16_t max_prev[3] = { -32767, -32767, -32767};
 
+int heading = 0;
 void clear_lcd();
 void debug2(int16_t m[3], int16_t n[3]);
 
+#define CL_THRESHOLD 100
+#define ACC_THRESHOLD 30
+int cl_progress = 0;
+
 // Calibration
-void calibrate(void)
+// Return 0 if calibration is done.
+int calibrate(void)
 {
+    int16_t accRaw[3];
     int16_t magRaw[3];
     clear_lcd();
+
+    readACC(accRaw);
+
+    // If the device isn't moving, don't do anything.
+    if ( (abs(acc_prev[0] - accRaw[0]) < ACC_THRESHOLD) &&
+            (abs(acc_prev[1] - accRaw[1]) < ACC_THRESHOLD) &&
+            (abs(acc_prev[2] - accRaw[2]) < ACC_THRESHOLD) ) {
+        memcpy(acc_prev, accRaw, sizeof(accRaw));
+        nrf_delay_ms(500);
+        return 1;
+    }
+
+    memcpy(acc_prev, accRaw, sizeof(accRaw));
 
     readMAG(magRaw);
 
@@ -174,9 +197,26 @@ void calibrate(void)
     if (magRaw[1] < min[1]) min[1] = magRaw[1];
     if (magRaw[2] < min[2]) min[2] = magRaw[2];
 
+    if ( min_prev[0] == min[0] && min_prev[1] == min[1] && 
+            min_prev[2] == min[2] && max_prev[0] == max[0] && 
+            max_prev[1] == max[1] && max_prev[2] == max[2] ) {
+        cl_progress++;
+    } else {
+        min_prev[0] = min[0];
+        min_prev[1] = min[1];
+        min_prev[2] = min[2]; 
+        max_prev[0] = max[0];
+        max_prev[1] = max[1]; 
+        max_prev[2] = max[2];
+        cl_progress = 0;
+    }
+
     debug2(max, min);
 
-    return;
+    if(cl_progress > CL_THRESHOLD)
+        return 0;
+
+    return 1;
 }
 
 float get_direction()
@@ -233,7 +273,6 @@ float get_direction()
     dir += nav.dir;
     if(dir > 360)
         dir -= 360;
-
 
     return dir;
 }

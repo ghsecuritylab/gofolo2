@@ -248,6 +248,7 @@ OPT += -flto
 
 # C flags common to all targets
 CFLAGS += $(OPT)
+CFLAGS += -DENV_OFFSET=0
 CFLAGS += -DLCD_LED_PIN=8
 CFLAGS += -DBUTTON=11
 CFLAGS += -DTWI_SDA_M=19
