@@ -9,12 +9,28 @@
 #include "nrf_drv_twi.h"
 #include "lsm9ds1.h"
 #include "proto.h"
+#include "nrf_fstorage_sd.h"
 
 #define M_PI 3.14159265358979323846264338327950288
 
-extern nav_t nav;
 int failed = 0;
+extern nav_t nav;
+extern nrf_fstorage_t fstorage;
 static const nrf_drv_twi_t m_twi_master = NRF_DRV_TWI_INSTANCE(0);
+
+#define CL_THRESHOLD 150
+#define ACC_THRESHOLD 30
+#define CL_MAGIC (0xDEADBEEF)
+typedef struct {
+   uint32_t magic;
+   int16_t min[3];
+   int16_t max[3];
+} flash_data_t;
+
+flash_data_t fd;
+int cl_progress = 0;
+void clear_lcd();
+void print_calibration(int16_t m[], int16_t n[], int cal);
 
 static ret_code_t i2c_write(uint8_t dev, uint8_t addr, uint8_t data)
 {
@@ -102,11 +118,13 @@ static void writeGyrReg(uint8_t reg, uint8_t value)
 
 static void enableIMU()
 {
+#if 0
     // SW_RESET
-    //writeGyrReg(LSM9DS1_CTRL_REG8, 0x81);
-    //nrf_delay_ms(200);
-    //writeGyrReg(LSM9DS1_CTRL_REG8, 0x0);
-    //nrf_delay_ms(200);
+    writeGyrReg(LSM9DS1_CTRL_REG8, 0x81);
+    nrf_delay_ms(200);
+    writeGyrReg(LSM9DS1_CTRL_REG8, 0x0);
+    nrf_delay_ms(200);
+#endif
 
     // Enable the gyroscope
     writeGyrReg(LSM9DS1_CTRL_REG4,0b00111000);      // z, y, x axis enabled for gyro
@@ -151,74 +169,7 @@ ret_code_t twi_master_init(void)
     return ret;
 }
 
-int16_t min[3] = {  32767,  32767,  32767};
-int16_t max[3] = { -32767, -32767, -32767};
-
-int16_t acc_prev[3] = { 0, 0, 0};
-int16_t min_prev[3] = {  32767,  32767,  32767};
-int16_t max_prev[3] = { -32767, -32767, -32767};
-
 int heading = 0;
-void clear_lcd();
-void debug2(int16_t m[3], int16_t n[3]);
-
-#define CL_THRESHOLD 100
-#define ACC_THRESHOLD 30
-int cl_progress = 0;
-
-// Calibration
-// Return 0 if calibration is done.
-int calibrate(void)
-{
-    int16_t accRaw[3];
-    int16_t magRaw[3];
-    clear_lcd();
-
-    readACC(accRaw);
-
-    // If the device isn't moving, don't do anything.
-    if ( (abs(acc_prev[0] - accRaw[0]) < ACC_THRESHOLD) &&
-            (abs(acc_prev[1] - accRaw[1]) < ACC_THRESHOLD) &&
-            (abs(acc_prev[2] - accRaw[2]) < ACC_THRESHOLD) ) {
-        memcpy(acc_prev, accRaw, sizeof(accRaw));
-        nrf_delay_ms(500);
-        return 1;
-    }
-
-    memcpy(acc_prev, accRaw, sizeof(accRaw));
-
-    readMAG(magRaw);
-
-    if (magRaw[0] > max[0]) max[0] = magRaw[0];
-    if (magRaw[1] > max[1]) max[1] = magRaw[1];
-    if (magRaw[2] > max[2]) max[2] = magRaw[2];
-
-    if (magRaw[0] < min[0]) min[0] = magRaw[0];
-    if (magRaw[1] < min[1]) min[1] = magRaw[1];
-    if (magRaw[2] < min[2]) min[2] = magRaw[2];
-
-    if ( min_prev[0] == min[0] && min_prev[1] == min[1] && 
-            min_prev[2] == min[2] && max_prev[0] == max[0] && 
-            max_prev[1] == max[1] && max_prev[2] == max[2] ) {
-        cl_progress++;
-    } else {
-        min_prev[0] = min[0];
-        min_prev[1] = min[1];
-        min_prev[2] = min[2]; 
-        max_prev[0] = max[0];
-        max_prev[1] = max[1]; 
-        max_prev[2] = max[2];
-        cl_progress = 0;
-    }
-
-    debug2(max, min);
-
-    if(cl_progress > CL_THRESHOLD)
-        return 0;
-
-    return 1;
-}
-
 float get_direction()
 {
     float dir;
@@ -229,9 +180,9 @@ float get_direction()
 
     readMAG(magRaw);
 
-    magRaw[0] -= (min[0] + max[0]) /2 ;
-    magRaw[1] -= (min[1] + max[1]) /2 ;
-    magRaw[2] -= (min[2] + max[2]) /2 ;
+    magRaw[0] -= (fd.min[0] + fd.max[0]) /2 ;
+    magRaw[1] -= (fd.min[1] + fd.max[1]) /2 ;
+    magRaw[2] -= (fd.min[2] + fd.max[2]) /2 ;
 
     readACC(accRaw);
 
@@ -275,4 +226,103 @@ float get_direction()
         dir -= 360;
 
     return dir;
+}
+
+static void power_manage(void)
+{
+    (void) sd_app_evt_wait();
+}
+
+void wait_for_flash_ready(nrf_fstorage_t const * p_fstorage)
+{
+    /* While fstorage is busy, sleep and wait for an event. */
+    while (nrf_fstorage_is_busy(p_fstorage))
+    {
+        power_manage();
+    }
+}
+
+void calibrate(void)
+{
+    int16_t accRaw[3], magRaw[3];
+    int16_t min_prev[3], max_prev[3], acc_prev[3];
+
+    fd.magic = CL_MAGIC;
+    fd.min[0] = fd.min[1] = fd.min[2] = 32767;
+    fd.max[0] = fd.max[1] = fd.max[2] = -32767;
+    memcpy(min_prev, fd.min, sizeof(min_prev));
+    memcpy(max_prev, fd.max, sizeof(max_prev));
+
+    // Start calibration
+    for(;;) {
+        readACC(accRaw);
+
+        // If the device isn't moving, don't do anything.
+        if ( (abs(acc_prev[0] - accRaw[0]) < ACC_THRESHOLD) &&
+                (abs(acc_prev[1] - accRaw[1]) < ACC_THRESHOLD) &&
+                (abs(acc_prev[2] - accRaw[2]) < ACC_THRESHOLD) ) {
+            memcpy(acc_prev, accRaw, sizeof(accRaw));
+            nrf_delay_ms(10);
+            continue;
+        }
+
+        memcpy(acc_prev, accRaw, sizeof(accRaw));
+
+        readMAG(magRaw);
+
+        if (magRaw[0] > fd.max[0]) fd.max[0] = magRaw[0];
+        if (magRaw[1] > fd.max[1]) fd.max[1] = magRaw[1];
+        if (magRaw[2] > fd.max[2]) fd.max[2] = magRaw[2];
+
+        if (magRaw[0] < fd.min[0]) fd.min[0] = magRaw[0];
+        if (magRaw[1] < fd.min[1]) fd.min[1] = magRaw[1];
+        if (magRaw[2] < fd.min[2]) fd.min[2] = magRaw[2];
+
+        if ( min_prev[0] == fd.min[0] && min_prev[1] == fd.min[1] && 
+                min_prev[2] == fd.min[2] && max_prev[0] == fd.max[0] && 
+                max_prev[1] == fd.max[1] && max_prev[2] == fd.max[2] ) {
+            cl_progress++;
+        } else {
+            memcpy(min_prev, fd.min, sizeof(min_prev));
+            memcpy(max_prev, fd.max, sizeof(max_prev));
+            cl_progress = 0;
+        }
+
+        clear_lcd();
+        print_calibration(fd.max, fd.min, 1);
+
+        if(cl_progress > CL_THRESHOLD) {
+            clear_lcd();
+            break;
+        }
+    }
+
+    print_calibration(fd.max, fd.min, 0);
+    nrf_delay_ms(4000);
+
+    return;
+}
+
+void imu_calibration_init(void)
+{
+    ret_code_t rc;
+    flash_data_t *fd_ptr = (flash_data_t *)FLASH_START;
+
+    if(fd_ptr->magic == CL_MAGIC) {
+        memcpy(&fd, fd_ptr, sizeof(fd));
+        print_calibration(fd.max, fd.min, 0);
+        nrf_delay_ms(4000);
+    } else {
+        calibrate();
+
+        rc = nrf_fstorage_erase(&fstorage, FLASH_START, 1, NULL);
+        APP_ERROR_CHECK(rc);
+        wait_for_flash_ready(&fstorage);
+
+        rc = nrf_fstorage_write(&fstorage, FLASH_START, &fd, sizeof(fd), NULL);
+        APP_ERROR_CHECK(rc);
+        wait_for_flash_ready(&fstorage);
+    }
+
+    return;
 }

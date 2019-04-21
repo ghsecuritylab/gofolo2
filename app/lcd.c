@@ -136,9 +136,17 @@ void show_arrow(void)
     show_distance(ang);
 }
 
-void debug2(int16_t m[], int16_t n[])
+void print_calibration(int16_t m[], int16_t n[], int cal)
 {
     char distance_str[20];
+
+    if(cal)
+        snprintf(distance_str, 20, "CALIBRATION...");
+    else
+        snprintf(distance_str, 20, "CALIBRATED");
+
+    nrf_gfx_point_t calibrate_point = NRF_GFX_POINT(20, 30);
+    APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &calibrate_point, 0, distance_str, &orkney_8ptFontInfo, true));
 
     snprintf(distance_str, 20, "X:%d", m[0]);
     nrf_gfx_point_t distance_point = NRF_GFX_POINT(0, 128 - 20);

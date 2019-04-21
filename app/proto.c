@@ -98,6 +98,9 @@ void data_handler(int len, const uint8_t *p)
             break;
         case CMD_UPGRADE:
             break;
+        case CMD_CALIBRATE:
+            st = 3;
+            break;
         default:
             break;
     }

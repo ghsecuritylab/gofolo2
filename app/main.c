@@ -27,6 +27,7 @@
 #include "nrf_pwr_mgmt.h"
 #include "nrf_calendar.h"
 #include "nrf_delay.h"
+#include "nrf_fstorage_sd.h"
 #include "imu.h"
 #include "lcd.h"
 #include "proto.h"
@@ -748,16 +749,32 @@ static void buttons_init(void)
     APP_ERROR_CHECK(err_code);
 }
 
-extern nav_t nav;
-int calibrate(void);
+NRF_FSTORAGE_DEF(nrf_fstorage_t fstorage) =
+{
+    /* These below are the boundaries of the flash space assigned to this instance of fstorage.
+     * You must set these manually, even at runtime, before nrf_fstorage_init() is called.
+     * The function nrf5_flash_end_addr_get() can be used to retrieve the last address on the
+     * last page of flash available to write data. */
+    .start_addr = FLASH_START,
+    .end_addr   = FLASH_END,
+};
+
+void calibrate(void);
+void imu_calibration_init(void);
 int main(void)
 {
+    ret_code_t err_code;
     // Initialize.
     timers_init();
     buttons_init();
 
     // LCD init
     gfx_initialization();
+
+    // Flash init
+    nrf_fstorage_api_t * p_fs_api = &nrf_fstorage_sd;
+    err_code = nrf_fstorage_init(&fstorage, p_fs_api, NULL);
+    APP_ERROR_CHECK(err_code);
 
     power_management_init();
     ble_stack_init();
@@ -785,7 +802,6 @@ int main(void)
     pwm1_cfg.pin_polarity[0] = APP_PWM_POLARITY_ACTIVE_HIGH;
 
     /* Initialize and enable PWM. */
-    ret_code_t err_code;
     err_code = app_pwm_init(&PWM1,&pwm1_cfg, NULL);
     APP_ERROR_CHECK(err_code);
     app_pwm_enable(&PWM1);
@@ -794,18 +810,25 @@ int main(void)
     while (app_pwm_channel_duty_set(&PWM1, 0, 2) == NRF_ERROR_BUSY);
 #endif
 
-    /* Sart calibration */
-    while(calibrate());
+    imu_calibration_init();
 
     // Enter main loop.
     for (;;)
     {
         for (uint8_t i = 0; i < 40; ++i)
         {
-            if(st)
-                show_arrow();
-            else
-                show_time();
+            switch(st) {
+                case 0:
+                    show_time();
+                    break;
+                case 1:
+                    show_arrow();
+                    break;
+                default:
+                    calibrate();
+                    st = 1;
+                    break;
+            }
         }
     }
 }

@@ -28,5 +28,6 @@ CMDs:
                                      COVERED - in UNITs
 
         7: Upgrade the firmware: [ LEN.4 | Firmware data ]
+        8: Calibrate the Magnetometer
 
 ==========================================================================================================
