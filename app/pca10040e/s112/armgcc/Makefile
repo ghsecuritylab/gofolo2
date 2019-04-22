@@ -211,6 +211,8 @@ OPT += -flto
 
 # C flags common to all targets
 CFLAGS += $(OPT)
+CFLAGS += -DFLASH_START=0x2C000
+CFLAGS += -DFLASH_END=0x2Cfff
 CFLAGS += -DENV_OFFSET=180
 CFLAGS += -DBUTTON=6
 CFLAGS += -DTWI_SDA_M=9

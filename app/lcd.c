@@ -127,9 +127,9 @@ void show_detail(void)
 {
     clear_lcd();
 
-    LCD_PRINT(  5, 10, &orkney_8ptFontInfo, "DISTANCE");    LCD_PRINT(  5, 90, &orkney_8ptFontInfo, "%lum", nav.dist);
-    LCD_PRINT( 25, 10, &orkney_8ptFontInfo, "LEFT");        LCD_PRINT( 25, 90, &orkney_8ptFontInfo, "%lum", nav.dist - nav.cov);
-    LCD_PRINT(123, 10, &orkney_8ptFontInfo, "COVERED");     LCD_PRINT(123, 90, &orkney_8ptFontInfo, "%lum", nav.cov);
+    LCD_PRINT(5, 10, &orkney_8ptFontInfo, "DISTANCE");    LCD_PRINT(85, 10, &orkney_8ptFontInfo, "%lum", nav.dist);
+    LCD_PRINT(5, 40, &orkney_8ptFontInfo, "LEFT");        LCD_PRINT(85, 40, &orkney_8ptFontInfo, "%lum", (nav.dist - nav.cov));
+    LCD_PRINT(5, 95, &orkney_8ptFontInfo, "COVERED");     LCD_PRINT(85, 95, &orkney_8ptFontInfo, "%lum", nav.cov);
 
     nrf_gfx_display(p_lcd);
 }
