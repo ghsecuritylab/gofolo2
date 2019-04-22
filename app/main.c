@@ -79,11 +79,6 @@ APP_TIMER_DEF(m_calendar_timer_id);
 
 static uint16_t m_conn_handle = BLE_CONN_HANDLE_INVALID;                        /**< Handle of the current connection. */
 
-/* YOUR_JOB: Declare all services structure your application is using
- *  BLE_XYZ_DEF(m_xyz);
- */
-
-// YOUR_JOB: Use UUIDs for service(s) used in your application.
 static ble_uuid_t m_adv_uuids[] =                                               /**< Universally unique service identifiers. */
 {
     {BLE_UUID_DEVICE_INFORMATION_SERVICE, BLE_UUID_TYPE_BLE}
@@ -108,11 +103,6 @@ void assert_nrf_callback(uint16_t line_num, const uint8_t * p_file_name)
     app_error_handler(DEAD_BEEF, line_num, p_file_name);
 }
 
-
-/**@brief Function for handling Peer Manager events.
- *
- * @param[in] p_evt  Peer Manager event.
- */
 static void pm_evt_handler(pm_evt_t const * p_evt)
 {
     ret_code_t err_code;
@@ -208,24 +198,15 @@ static void pm_evt_handler(pm_evt_t const * p_evt)
 }
 
 APP_TIMER_DEF(m_battery_timer_id);
-
-/* Battery Level sensor simulator configuration. */
 static sensorsim_cfg_t m_battery_sim_cfg;
-
-/* Battery Level sensor simulator state. */
 static sensorsim_state_t m_battery_sim_state;
-
-/* Minimum battery level as returned by the simulated measurement function. */
 #define MIN_BATTERY_LEVEL 81
-
-/* Maximum battery level as returned by the simulated measurement function. */
 #define MAX_BATTERY_LEVEL 100
-
-/* Value by which the battery level is incremented/decremented for each call to the simulated measurement function. */
 #define BATTERY_LEVEL_INCREMENT 1
+#define BATTERY_LEVEL_MEAS_INTERVAL     APP_TIMER_TICKS(2000)
 
-/**@brief Function for initializing the sensor simulators.
- */
+#define CALENDAR_INTERVAL               APP_TIMER_TICKS(1000)
+
 static void sensor_simulator_init(void)
 {
     m_battery_sim_cfg.min          = MIN_BATTERY_LEVEL;
@@ -259,22 +240,15 @@ static void battery_level_meas_timeout_handler(void * p_context)
 {
     UNUSED_PARAMETER(p_context);
     if(0)
-    battery_level_update();
+        battery_level_update();
 }
 
 void calendar_timeout_handler(void * p_context);
-
-/**@brief Function for the Timer initialization.
- *
- * @details Initializes the timer module. This creates and starts application timers.
- */
 static void timers_init(void)
 {
-    // Initialize timer module.
     ret_code_t err_code = app_timer_init();
     APP_ERROR_CHECK(err_code);
 
-    // Create timers.
     err_code = app_timer_create(&m_battery_timer_id,
                                 APP_TIMER_MODE_REPEATED,
                                 battery_level_meas_timeout_handler);
@@ -286,12 +260,6 @@ static void timers_init(void)
     APP_ERROR_CHECK(err_code);
 }
 
-
-/**@brief Function for the GAP initialization.
- *
- * @details This function sets up all the necessary GAP (Generic Access Profile) parameters of the
- *          device including the device name, appearance, and the preferred connection parameters.
- */
 static void gap_params_init(void)
 {
     ret_code_t              err_code;
@@ -319,15 +287,11 @@ static void gap_params_init(void)
     APP_ERROR_CHECK(err_code);
 }
 
-
-/**@brief Function for initializing the GATT module.
- */
 static void gatt_init(void)
 {
     ret_code_t err_code = nrf_ble_gatt_init(&m_gatt, NULL);
     APP_ERROR_CHECK(err_code);
 }
-
 
 static void on_cus_evt(ble_cus_t     * p_cus_service,
                        ble_cus_evt_t * p_evt)
@@ -360,8 +324,6 @@ static void on_cus_evt(ble_cus_t     * p_cus_service,
     }
 }
 
-/**@brief Function for initializing services that will be used by the application.
- */
 static void services_init(void)
 {
     ret_code_t         err_code;
@@ -392,7 +354,6 @@ static void services_init(void)
     APP_ERROR_CHECK(err_code);
 }
 
-
 /**@brief Function for handling the Connection Parameters Module.
  *
  * @details This function will be called for all events in the Connection Parameters Module which
@@ -414,19 +375,11 @@ static void on_conn_params_evt(ble_conn_params_evt_t * p_evt)
     }
 }
 
-
-/**@brief Function for handling a Connection Parameters error.
- *
- * @param[in] nrf_error  Error code containing information about what went wrong.
- */
 static void conn_params_error_handler(uint32_t nrf_error)
 {
     APP_ERROR_HANDLER(nrf_error);
 }
 
-
-/**@brief Function for initializing the Connection Parameters module.
- */
 static void conn_params_init(void)
 {
     ret_code_t err_code;
@@ -447,13 +400,6 @@ static void conn_params_init(void)
     APP_ERROR_CHECK(err_code);
 }
 
-/* Battery level measurement interval (ticks). */
-#define BATTERY_LEVEL_MEAS_INTERVAL     APP_TIMER_TICKS(2000)
-
-#define CALENDAR_INTERVAL               APP_TIMER_TICKS(1000)
-
-/**@brief Function for starting timers.
- */
 static void application_timers_start(void)
 {
     ret_code_t err_code;
@@ -466,11 +412,6 @@ static void application_timers_start(void)
     APP_ERROR_CHECK(err_code);
 }
 
-
-/**@brief Function for putting the chip into sleep mode.
- *
- * @note This function will not return.
- */
 static void sleep_mode_enter(void)
 {
     ret_code_t err_code;
@@ -489,13 +430,6 @@ static void sleep_mode_enter(void)
     APP_ERROR_CHECK(err_code);
 }
 
-
-/**@brief Function for handling advertising events.
- *
- * @details This function will be called for advertising events which are passed to the application.
- *
- * @param[in] ble_adv_evt  Advertising event.
- */
 static void on_adv_evt(ble_adv_evt_t ble_adv_evt)
 {
     ret_code_t err_code;
@@ -517,12 +451,6 @@ static void on_adv_evt(ble_adv_evt_t ble_adv_evt)
     }
 }
 
-
-/**@brief Function for handling BLE events.
- *
- * @param[in]   p_ble_evt   Bluetooth stack event.
- * @param[in]   p_context   Unused.
- */
 static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
 {
     ret_code_t err_code = NRF_SUCCESS;
@@ -574,11 +502,6 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
     }
 }
 
-
-/**@brief Function for initializing the BLE stack.
- *
- * @details Initializes the SoftDevice and the BLE event interrupt.
- */
 static void ble_stack_init(void)
 {
     ret_code_t err_code;
@@ -600,9 +523,6 @@ static void ble_stack_init(void)
     NRF_SDH_BLE_OBSERVER(m_ble_observer, APP_BLE_OBSERVER_PRIO, ble_evt_handler, NULL);
 }
 
-
-/**@brief Function for the Peer Manager initialization.
- */
 static void peer_manager_init(void)
 {
     ble_gap_sec_params_t sec_param;
@@ -634,23 +554,14 @@ static void peer_manager_init(void)
     APP_ERROR_CHECK(err_code);
 }
 
-
-/**@brief Clear bond information from persistent storage.
- */
 static void delete_bonds(void)
 {
     ret_code_t err_code;
-
-    //NRF_LOG_INFO("Erase bonds!");
 
     err_code = pm_peers_delete();
     APP_ERROR_CHECK(err_code);
 }
 
-
-
-/**@brief Function for initializing the Advertising functionality.
- */
 static void advertising_init(void)
 {
     ret_code_t             err_code;
@@ -676,8 +587,6 @@ static void advertising_init(void)
     ble_advertising_conn_cfg_tag_set(&m_advertising, APP_BLE_CONN_CFG_TAG);
 }
 
-/**@brief Function for initializing power management.
- */
 static void power_management_init(void)
 {
     ret_code_t err_code;
@@ -685,12 +594,7 @@ static void power_management_init(void)
     APP_ERROR_CHECK(err_code);
 }
 
-
 #if 0
-/**@brief Function for handling the idle state (main loop).
- *
- * @details If there is no pending log operation, then sleep until next the next event occurs.
- */
 static void idle_state_handle(void)
 {
     if (0)
@@ -700,19 +604,12 @@ static void idle_state_handle(void)
 }
 #endif
 
-/**@brief Function for starting advertising.
- */
 static void advertising_start(bool erase_bonds)
 {
-    if (erase_bonds == true)
-    {
+    if (erase_bonds == true) {
         delete_bonds();
-        // Advertising is started by PM_EVT_PEERS_DELETED_SUCEEDED event
-    }
-    else
-    {
+    } else {
         ret_code_t err_code = ble_advertising_start(&m_advertising, BLE_ADV_MODE_FAST);
-
         APP_ERROR_CHECK(err_code);
     }
 }
@@ -763,18 +660,12 @@ void calibrate(void);
 void imu_calibration_init(void);
 int main(void)
 {
-    ret_code_t err_code;
-    // Initialize.
+    nrf_fstorage_api_t * p_fs_api = &nrf_fstorage_sd;
+
     timers_init();
     buttons_init();
-
-    // LCD init
     gfx_initialization();
-
-    // Flash init
-    nrf_fstorage_api_t * p_fs_api = &nrf_fstorage_sd;
-    err_code = nrf_fstorage_init(&fstorage, p_fs_api, NULL);
-    APP_ERROR_CHECK(err_code);
+    nrf_fstorage_init(&fstorage, p_fs_api, NULL);
 
     power_management_init();
     ble_stack_init();
@@ -802,8 +693,7 @@ int main(void)
     pwm1_cfg.pin_polarity[0] = APP_PWM_POLARITY_ACTIVE_HIGH;
 
     /* Initialize and enable PWM. */
-    err_code = app_pwm_init(&PWM1,&pwm1_cfg, NULL);
-    APP_ERROR_CHECK(err_code);
+    app_pwm_init(&PWM1,&pwm1_cfg, NULL);
     app_pwm_enable(&PWM1);
 
     /* Set the duty cycle - keep trying until PWM is ready... */
@@ -813,22 +703,22 @@ int main(void)
     imu_calibration_init();
 
     // Enter main loop.
-    for (;;)
-    {
-        for (uint8_t i = 0; i < 40; ++i)
-        {
-            switch(st) {
-                case 0:
-                    show_time();
-                    break;
-                case 1:
-                    show_arrow();
-                    break;
-                default:
-                    calibrate();
-                    st = 1;
-                    break;
-            }
+    for (;;) {
+        switch(st) {
+            case 0:
+                show_time();
+                break;
+            case 1:
+                show_arrow();
+                break;
+            case 2:
+                show_detail();
+                nrf_delay_ms(1000);
+                break;
+            default:
+                calibrate();
+                st = 1;
+                break;
         }
     }
 }

@@ -20,7 +20,7 @@ static const nrf_drv_twi_t m_twi_master = NRF_DRV_TWI_INSTANCE(0);
 
 #define CL_THRESHOLD 150
 #define ACC_THRESHOLD 30
-#define CL_MAGIC (0xDEADBEEF)
+#define CL_MAGIC (0x1EAF1E55)
 typedef struct {
    uint32_t magic;
    int16_t min[3];
@@ -288,13 +288,10 @@ void calibrate(void)
             cl_progress = 0;
         }
 
-        clear_lcd();
         print_calibration(fd.max, fd.min, 1);
 
-        if(cl_progress > CL_THRESHOLD) {
-            clear_lcd();
+        if(cl_progress > CL_THRESHOLD)
             break;
-        }
     }
 
     print_calibration(fd.max, fd.min, 0);

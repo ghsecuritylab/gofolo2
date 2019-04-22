@@ -18,6 +18,14 @@
 #define BLACK 0
 #define WHITE 1
 
+#define LCD_PRINT(x, y, font, ...) \
+    do { \
+        char s[32]; \
+        sprintf(s, ##__VA_ARGS__); \
+        nrf_gfx_point_t p = NRF_GFX_POINT((x), (y)); \
+        APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &p, BLACK, s, (font), true)); \
+    } while(0)
+
 extern nav_t nav;
 extern int failed;
 extern const nrf_lcd_t nrf_lcd_sharp;
@@ -98,33 +106,6 @@ void show_time()
 }
 
 extern int heading;
-void show_distance(int ang)
-{
-    char distance_str[20];
-
-    snprintf(distance_str, 20, "N:%d", heading);
-    nrf_gfx_point_t distance_point = NRF_GFX_POINT(45, 128 - 20);
-    APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &distance_point, 0, distance_str, &orkney_8ptFontInfo, true));
-
-    snprintf(distance_str, 20, "C:%lu", nav.cov);
-    nrf_gfx_point_t distance_point1 = NRF_GFX_POINT(90, 128 - 40);
-    APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &distance_point1, 0, distance_str, &orkney_8ptFontInfo, true));
-
-    snprintf(distance_str, 20, "M:%lu", nav.met);
-    nrf_gfx_point_t distance_point2 = NRF_GFX_POINT(0, 128 - 40);
-    APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &distance_point2, 0, distance_str, &orkney_8ptFontInfo, true));
-
-    snprintf(distance_str, 20, "Dr:%d", nav.dir);
-    nrf_gfx_point_t distance_point3 = NRF_GFX_POINT(0, 128 - 20);
-    APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &distance_point3, 0, distance_str, &orkney_8ptFontInfo, true));
-
-    snprintf(distance_str, 20, "D:%lu", nav.dist);
-    nrf_gfx_point_t distance_point4 = NRF_GFX_POINT(90, 128 - 20);
-    APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &distance_point4, 0, distance_str, &orkney_8ptFontInfo, true));
-
-    nrf_gfx_display(p_lcd);
-}
-
 void show_arrow(void)
 {
     int ang = roundf(get_direction());
@@ -133,44 +114,42 @@ void show_arrow(void)
     else 
         select_frame(p_lcd, 360 - ang);
 
-    show_distance(ang);
+    LCD_PRINT(0, 128 - 20, &orkney_8ptFontInfo, "Dr:%d", nav.dir);
+    LCD_PRINT(0, 128 - 40, &orkney_8ptFontInfo, "M:%lu", nav.met);
+    LCD_PRINT(45, 128 - 20, &orkney_8ptFontInfo, "N:%d", heading);
+    LCD_PRINT(90, 128 - 20, &orkney_8ptFontInfo, "D:%lu", nav.dist);
+    LCD_PRINT(90, 128 - 40, &orkney_8ptFontInfo, "C:%lu", nav.cov);
+
+    nrf_gfx_display(p_lcd);
+}
+
+void show_detail(void)
+{
+    clear_lcd();
+
+    LCD_PRINT(  5, 10, &orkney_8ptFontInfo, "DISTANCE");    LCD_PRINT(  5, 90, &orkney_8ptFontInfo, "%lum", nav.dist);
+    LCD_PRINT( 25, 10, &orkney_8ptFontInfo, "LEFT");        LCD_PRINT( 25, 90, &orkney_8ptFontInfo, "%lum", nav.dist - nav.cov);
+    LCD_PRINT(123, 10, &orkney_8ptFontInfo, "COVERED");     LCD_PRINT(123, 90, &orkney_8ptFontInfo, "%lum", nav.cov);
+
+    nrf_gfx_display(p_lcd);
 }
 
 void print_calibration(int16_t m[], int16_t n[], int cal)
 {
-    char distance_str[20];
+    clear_lcd();
 
     if(cal)
-        snprintf(distance_str, 20, "CALIBRATION...");
+        LCD_PRINT(20, 30, &orkney_8ptFontInfo, "CALIBRATION...");
     else
-        snprintf(distance_str, 20, "CALIBRATED");
+        LCD_PRINT(20, 30, &orkney_8ptFontInfo, "CALIBRATED");
 
-    nrf_gfx_point_t calibrate_point = NRF_GFX_POINT(20, 30);
-    APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &calibrate_point, 0, distance_str, &orkney_8ptFontInfo, true));
+    LCD_PRINT(5, 128 - 60, &orkney_8ptFontInfo, "X:%d", m[0]);
+    LCD_PRINT(5, 128 - 40, &orkney_8ptFontInfo, "Y:%d", m[1]);
+    LCD_PRINT(5, 128 - 20, &orkney_8ptFontInfo, "Z:%d", m[2]);
 
-    snprintf(distance_str, 20, "X:%d", m[0]);
-    nrf_gfx_point_t distance_point = NRF_GFX_POINT(0, 128 - 20);
-    APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &distance_point, 0, distance_str, &orkney_8ptFontInfo, true));
-
-    snprintf(distance_str, 20, "Y:%d", m[1]);
-    nrf_gfx_point_t distance_point1 = NRF_GFX_POINT(0, 128 - 40);
-    APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &distance_point1, 0, distance_str, &orkney_8ptFontInfo, true));
-
-    snprintf(distance_str, 20, "Z:%d", m[2]);
-    nrf_gfx_point_t distance_point2 = NRF_GFX_POINT(0, 128 - 60);
-    APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &distance_point2, 0, distance_str, &orkney_8ptFontInfo, true));
-
-    snprintf(distance_str, 20, "X:%d", n[0]);
-    nrf_gfx_point_t distance_point3 = NRF_GFX_POINT(60, 128 - 20);
-    APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &distance_point3, 0, distance_str, &orkney_8ptFontInfo, true));
-
-    snprintf(distance_str, 20, "Y:%d", n[1]);
-    nrf_gfx_point_t distance_point4 = NRF_GFX_POINT(60, 128 - 40);
-    APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &distance_point4, 0, distance_str, &orkney_8ptFontInfo, true));
-
-    snprintf(distance_str, 20, "Z:%d", n[2]);
-    nrf_gfx_point_t distance_point5 = NRF_GFX_POINT(60, 128 - 60);
-    APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &distance_point5, 0, distance_str, &orkney_8ptFontInfo, true));
+    LCD_PRINT(65, 128 - 60, &orkney_8ptFontInfo, "X:%d", n[0]);
+    LCD_PRINT(65, 128 - 40, &orkney_8ptFontInfo, "Y:%d", n[1]);
+    LCD_PRINT(65, 128 - 20, &orkney_8ptFontInfo, "Z:%d", n[2]);
 
     nrf_gfx_display(p_lcd);
 }
