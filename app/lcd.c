@@ -114,11 +114,14 @@ void show_arrow(void)
     else 
         select_frame(p_lcd, 360 - ang);
 
+    LCD_PRINT(45, 128 - 20, &motorOil1937M54_14ptFontInfo, "%lum", nav.met);
+#if 0
     LCD_PRINT(0, 128 - 20, &orkney_8ptFontInfo, "Dr:%d", nav.dir);
     LCD_PRINT(0, 128 - 40, &orkney_8ptFontInfo, "M:%lu", nav.met);
     LCD_PRINT(45, 128 - 20, &orkney_8ptFontInfo, "N:%d", heading);
     LCD_PRINT(90, 128 - 20, &orkney_8ptFontInfo, "D:%lu", nav.dist);
     LCD_PRINT(90, 128 - 40, &orkney_8ptFontInfo, "C:%lu", nav.cov);
+#endif
 
     nrf_gfx_display(p_lcd);
 }
