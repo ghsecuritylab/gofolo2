@@ -74,13 +74,11 @@ void data_handler(int len, const uint8_t *p)
 
     switch(pkt->cmd) {
         case CMD_CLOCK_MDOE:
-            st = 0;
-            break;
         case CMD_NAV_MODE:
-            st = 1;
-            break;
         case CMD_DETAILED:
-            st = 2;
+        case CMD_UPGRADE:
+        case CMD_CALIBRATE:
+            st = pkt->cmd;
             break;
         case CMD_CFG:
             nrf_cal_set_time_raw(ntohl(pkt->p.cfg.date));
@@ -95,11 +93,6 @@ void data_handler(int len, const uint8_t *p)
             nav.dist = pkt->p.nav.dist;
             nav.met = pkt->p.nav.met;
             nav.cov = pkt->p.nav.cov;
-            break;
-        case CMD_UPGRADE:
-            break;
-        case CMD_CALIBRATE:
-            st = 3;
             break;
         default:
             break;

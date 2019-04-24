@@ -137,8 +137,6 @@ int main(void)
     (void) NRF_LOG_INIT(nrf_bootloader_dfu_timer_counter_get);
     NRF_LOG_DEFAULT_BACKENDS_INIT();
 
-    NRF_LOG_INFO("Inside main");
-
     ret_val = nrf_bootloader_init(dfu_observer);
     APP_ERROR_CHECK(ret_val);
 
@@ -146,9 +144,6 @@ int main(void)
     // no ongoing DFU operation and found a valid main application.
     // Boot the main application.
     nrf_bootloader_app_start();
-
-    // Should never be reached.
-    NRF_LOG_INFO("After main");
 }
 
 /**

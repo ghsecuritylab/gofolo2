@@ -27,7 +27,7 @@ CMDs:
                                     DISTANCE - in UNITs
                                      COVERED - in UNITs
 
-        7: Upgrade the firmware: [ LEN.4 | Firmware data ]
-        8: Calibrate the Magnetometer
+        7: Enter Device Firmware Upgrade (DFU) mode: [ NO-PAYLOAD ]
+        8: Calibrate the Magnetometer: [ NO-PAYLOAD ]
 
 ==========================================================================================================

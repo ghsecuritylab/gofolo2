@@ -28,6 +28,7 @@
 #include "nrf_calendar.h"
 #include "nrf_delay.h"
 #include "nrf_fstorage_sd.h"
+#include "nrf_bootloader_info.h"
 #include "imu.h"
 #include "lcd.h"
 #include "proto.h"
@@ -620,7 +621,10 @@ static void button_event_handler(uint8_t pin_no, uint8_t button_action)
         switch (button_action)
         {
             case APP_BUTTON_PUSH:
-                st = !st;
+                if(st > 1)
+                    st = 0;
+                else
+                    st++;
                 break;
             case APP_BUTTON_RELEASE:
                 break;
@@ -656,6 +660,22 @@ NRF_FSTORAGE_DEF(nrf_fstorage_t fstorage) =
     .end_addr   = FLASH_END,
 };
 
+static void advertising_config_get(ble_adv_modes_config_t * p_config)
+{
+    memset(p_config, 0, sizeof(ble_adv_modes_config_t));
+
+    p_config->ble_adv_fast_enabled  = true;
+    p_config->ble_adv_fast_interval = APP_ADV_INTERVAL;
+    p_config->ble_adv_fast_timeout  = APP_ADV_DURATION;
+}
+
+static void disconnect(uint16_t conn_handle, void * p_context)
+{
+    UNUSED_PARAMETER(p_context);
+    sd_ble_gap_disconnect(conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
+}
+
+void lcd_print(int y, char *st);
 void calibrate(void);
 void imu_calibration_init(void);
 int main(void)
@@ -705,19 +725,31 @@ int main(void)
     // Enter main loop.
     for (;;) {
         switch(st) {
-            case 0:
+            case CMD_CLOCK_MDOE:
                 show_time();
                 break;
-            case 1:
+            case CMD_NAV_MODE:
                 show_arrow();
                 break;
-            case 2:
+            case CMD_DETAILED:
                 show_detail();
                 nrf_delay_ms(1000);
                 break;
-            default:
+            case CMD_CALIBRATE:
                 calibrate();
-                st = 1;
+                st = CMD_NAV_MODE;
+                break;
+            case CMD_UPGRADE:
+                nrf_delay_ms(1000);
+                nrf_sdh_disable_request();
+                app_timer_stop_all();
+
+                sd_power_gpregret_clr(0, 0xffffffff);
+                sd_power_gpregret_set(0, BOOTLOADER_DFU_START);
+                nrf_pwr_mgmt_shutdown(NRF_PWR_MGMT_SHUTDOWN_GOTO_DFU);
+                st = CMD_DETAILED;
+            default:
+                nrf_delay_ms(1000);
                 break;
         }
     }

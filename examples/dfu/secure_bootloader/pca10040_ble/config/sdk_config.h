@@ -78,7 +78,7 @@
 // <e> NRF_BL_DFU_ENTER_METHOD_BUTTON - Enter DFU mode on button press.
 //==========================================================
 #ifndef NRF_BL_DFU_ENTER_METHOD_BUTTON
-#define NRF_BL_DFU_ENTER_METHOD_BUTTON 1
+#define NRF_BL_DFU_ENTER_METHOD_BUTTON 0
 #endif
 // <o> NRF_BL_DFU_ENTER_METHOD_BUTTON_PIN  - Button for entering DFU mode.
  
@@ -125,7 +125,7 @@
  
 
 #ifndef NRF_BL_DFU_ENTER_METHOD_PINRESET
-#define NRF_BL_DFU_ENTER_METHOD_PINRESET 0
+#define NRF_BL_DFU_ENTER_METHOD_PINRESET 1
 #endif
 
 // <q> NRF_BL_DFU_ENTER_METHOD_GPREGRET  - Enter DFU mode when bit 1 (0-indexed) is set in the NRF_POWER_GPREGRET register.
@@ -139,7 +139,7 @@
  
 
 #ifndef NRF_BL_DFU_ENTER_METHOD_BUTTONLESS
-#define NRF_BL_DFU_ENTER_METHOD_BUTTONLESS 0
+#define NRF_BL_DFU_ENTER_METHOD_BUTTONLESS 1
 #endif
 
 // </h> 
@@ -915,7 +915,7 @@
 #endif
 // <s> NRF_DFU_BLE_ADV_NAME - Default advertising name.
 #ifndef NRF_DFU_BLE_ADV_NAME
-#define NRF_DFU_BLE_ADV_NAME "DfuTarg"
+#define NRF_DFU_BLE_ADV_NAME "GoFoloDFU"
 #endif
 
 // <o> NRF_DFU_BLE_ADV_INTERVAL - Advertising interval (in units of 0.625 ms) 
@@ -1087,7 +1087,7 @@
 // <i> firmware upgrade. The size must be a multiple of the flash page size.
 
 #ifndef NRF_DFU_APP_DATA_AREA_SIZE
-#define NRF_DFU_APP_DATA_AREA_SIZE 12288
+#define NRF_DFU_APP_DATA_AREA_SIZE 102400
 #endif
 
 // <q> NRF_DFU_SAVE_PROGRESS_IN_FLASH  - Save DFU progress in flash.

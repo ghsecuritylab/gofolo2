@@ -236,6 +236,7 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/nfc/ndef/conn_hand_parser/ac_rec_parser \
   $(SDK_ROOT)/components/libraries/stack_guard \
   $(SDK_ROOT)/components/libraries/log/src \
+  $(SDK_ROOT)/components/libraries/bootloader \
   $(SDK_ROOT)/external/thedotfactory_fonts \
 
 # Libraries common to all targets

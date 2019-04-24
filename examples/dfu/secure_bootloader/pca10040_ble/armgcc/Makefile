@@ -44,7 +44,7 @@ SRC_FILES += \
   $(SDK_ROOT)/components/libraries/crypto/nrf_crypto_hash.c \
   $(SDK_ROOT)/components/libraries/crypto/nrf_crypto_init.c \
   $(SDK_ROOT)/components/libraries/crypto/nrf_crypto_shared.c \
-  $(PROJ_DIR)/../dfu_public_key.c \
+  $(PROJ_DIR)/dfu_public_key.c \
   $(PROJ_DIR)/main.c \
   $(SDK_ROOT)/components/ble/common/ble_srv_common.c \
   $(SDK_ROOT)/components/libraries/bootloader/nrf_bootloader.c \
