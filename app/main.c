@@ -87,6 +87,7 @@ static ble_uuid_t m_adv_uuids[] =                                               
 
 static void advertising_start(bool erase_bonds);
 
+extern uint8_t color_cfg;
 
 /**@brief Callback function for asserts in the SoftDevice.
  *
@@ -660,24 +661,6 @@ NRF_FSTORAGE_DEF(nrf_fstorage_t fstorage) =
     .end_addr   = FLASH_END,
 };
 
-static void advertising_config_get(ble_adv_modes_config_t * p_config)
-{
-    memset(p_config, 0, sizeof(ble_adv_modes_config_t));
-
-    p_config->ble_adv_fast_enabled  = true;
-    p_config->ble_adv_fast_interval = APP_ADV_INTERVAL;
-    p_config->ble_adv_fast_timeout  = APP_ADV_DURATION;
-}
-
-static void disconnect(uint16_t conn_handle, void * p_context)
-{
-    UNUSED_PARAMETER(p_context);
-    sd_ble_gap_disconnect(conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
-}
-
-void lcd_print(int y, char *st);
-void calibrate(void);
-void imu_calibration_init(void);
 int main(void)
 {
     nrf_fstorage_api_t * p_fs_api = &nrf_fstorage_sd;
@@ -732,6 +715,7 @@ int main(void)
                 show_arrow();
                 break;
             case CMD_DETAILED:
+                color_cfg = !color_cfg;
                 show_detail();
                 nrf_delay_ms(1000);
                 break;

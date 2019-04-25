@@ -12,6 +12,12 @@
 #include "nrf_delay.h"
 #include "proto.h"
 
+/* LCD resolution */
+#define LCD_XRES 128
+#define LCD_YRES 128
+#define LCD_BYTES_LINE LCD_XRES / 8
+#define LCD_BUF_SIZE LCD_YRES * LCD_BYTES_LINE
+
 #define ARROW_S 112
 #define M_PI 3.14159265358979323846264338327950288
 #define M_GET_BYTE(a, i, j) (a[(i) * ARROW_S / 8 + (j) / 8])
@@ -19,6 +25,7 @@
 #define M_SET_BIT(a, i, j, v) (M_GET_BYTE((a), (i), (j)) = (M_GET_BYTE((a), (i), (j)) & ~(1 << (7 - (j) % 8))) | ((v) << (7 - (j) % 8)))
 
 extern nav_t nav;
+extern uint8_t color_cfg;
 
 static float fastsinf[360];
 static float fastcosf[360];
@@ -58,7 +65,6 @@ void rotate_matrix(int degree)
         }
     }
 
-#if 1
     // anti-aliasing
     for(i = 0; i < ARROW_S; ++i) {
         for(j = 0; j < ARROW_S; ++j) {
@@ -78,7 +84,6 @@ void rotate_matrix(int degree)
             }
         }
     }
-#endif
 }
 
 static const nrf_drv_spi_t spi = NRF_DRV_SPI_INSTANCE(PCB_SPI_INSTANCE);
@@ -95,11 +100,18 @@ static void sharp_frame_draw(uint16_t x, uint16_t y, uint16_t width, uint16_t he
 {
     uint16_t i = 0, j = 0, m, n;
 
-    for(m = 0, i = x; i < height + x; i++, m++) {
-        for(n = 0, j = y; j < width + y; j++, n++) {
-          sharp_pixel_draw(i, j, (f[n * width / 8 + m / 8] >> (7 - m % 8)) & 1);
+    if(color_cfg)
+        for(m = 0, i = x; i < height + x; i++, m++) {
+            for(n = 0, j = y; j < width + y; j++, n++) {
+                sharp_pixel_draw(i, j, !((f[n * width / 8 + m / 8] >> (7 - m % 8)) & 1));
+            }
         }
-    }
+    else 
+        for(m = 0, i = x; i < height + x; i++, m++) {
+            for(n = 0, j = y; j < width + y; j++, n++) {
+                sharp_pixel_draw(i, j, (f[n * width / 8 + m / 8] >> (7 - m % 8)) & 1);
+            }
+        }
 }
 
 static void sharp_rect_draw(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint32_t color)
@@ -111,7 +123,6 @@ static void sharp_rect_draw(uint16_t x, uint16_t y, uint16_t width, uint16_t hei
           sharp_pixel_draw(i, j, color);
         }
     }
-    
 }
 
 static void sharp_rotation_set(nrf_lcd_rotation_t rotation)
@@ -136,12 +147,6 @@ static lcd_cb_t sharp_cb = {
     .height = 128,
     .width = 128
 };
-
-/* LCD resolution */
-#define LCD_XRES 128
-#define LCD_YRES 128
-#define LCD_BYTES_LINE LCD_XRES / 8
-#define LCD_BUF_SIZE LCD_YRES * LCD_BYTES_LINE
 
 uint8_t bit_swap(uint8_t b) 
 {
@@ -194,18 +199,10 @@ static void sharp_display(void)
 
 void clear_lcd()
 {
-#if 0
-    uint8_t data[2];
-
-    data[0] = 4;
-    data[1] = 0;
-    data[1] = data[0];
-
-    nrf_gpio_pin_set(LCD_SPI_SS_PIN);
-    APP_ERROR_CHECK(nrf_drv_spi_transfer(&spi, data, 2, NULL, 0));
-    nrf_gpio_pin_clear(LCD_SPI_SS_PIN); 
-#endif
-    memset(frame, 0xFF, sizeof(frame));
+    if(color_cfg)
+        memset(frame, 0x00, sizeof(frame));
+    else
+        memset(frame, 0xFF, sizeof(frame));
 }
 
 ret_code_t sharp_init(void)
@@ -256,7 +253,7 @@ const nrf_lcd_t nrf_lcd_sharp = {
 
 int select_frame(const nrf_lcd_t * p_lcd, int ang)
 {
-    memset(frame, 0xFF, sizeof(frame));
+    clear_lcd();
 
     rotate_matrix(ang);
 

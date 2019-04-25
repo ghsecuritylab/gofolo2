@@ -1,5 +1,5 @@
 /*
- * GoFolo BLE Protocol v1.0:
+ * GoFolo BLE Protocol v1.1:
  * 
  * PKT FORMAT: { CMD.1 [---------PAYLOAD----------] }
  *             ^----------- PKT_LEN ----------------^
@@ -10,11 +10,11 @@
  *         0: Clock mode:           [ NO-PAYLOAD ]
  *         1: Navigation mode:      [ NO-PAYLOAD ]
  *         2: Detailed mode:        [ NO-PAYLOAD ]
- *         3: Configure the device: [ DATE_AND_TIME.4 | UNIT.1 ]
+ *         3: Configure the device: [ DATE_AND_TIME.4 | UNIT.1 | COLOR.1 ]
  * 
  *                                    DATE_AND_TIME - seconds since 1970-01-01 00:00:00 UTC
- *                                        NEXT_TURN - 0: RIGHT, 1: LEFT, 2: OFF
  *                                             UNIT - 0: in meters, 1: in feet
+ *                                            COLOR - 0: black on white, 1: white on black
  * 
  *         4: Start navigation:     [ NO-PAYLOAD ] 
  *         5: Stop navigation:      [ NO-PAYLOAD ] 
@@ -26,7 +26,8 @@
  *                                     DISTANCE - in UNITs
  *                                      COVERED - in UNITs
  * 
- *         7: Upgrade the firmware: [ LEN.4 | Firmware data ]
+ *         7: Enter Device Firmware Upgrade (DFU) mode: [ NO-PAYLOAD ]
+ *         8: Calibrate the Magnetometer: [ NO-PAYLOAD ]
  */
 
 #include <stdio.h>
@@ -38,6 +39,9 @@
 
 uint8_t nav_next = 0;
 uint16_t nav_dir = 0;
+
+extern int st;
+extern uint8_t color_cfg;
 
 nav_t nav = { 0 };
 
@@ -61,8 +65,6 @@ uint32_t ntohl(uint32_t const net)
         | ((uint32_t) data[0] << 24);
 }
 
-extern int st;
-
 void data_handler(int len, const uint8_t *p)
 {
 #if 0
@@ -82,10 +84,14 @@ void data_handler(int len, const uint8_t *p)
             break;
         case CMD_CFG:
             nrf_cal_set_time_raw(ntohl(pkt->p.cfg.date));
+            color_cfg = pkt->p.cfg.color;
             break;
         case CMD_START:
+            st = CMD_NAV_MODE;
             break;
         case CMD_STOP:
+            memset(nav, 0x00, sizeof(nav));
+            st = CMD_CLOCK_MDOE;
             break;
         case CMD_NAV:
             nav.next = pkt->p.nav.next;

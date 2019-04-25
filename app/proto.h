@@ -1,6 +1,7 @@
 typedef struct __attribute__((__packed__)) cfg_s {
     uint32_t date;
     uint8_t unit;
+    uint8_t color;
 } cfg_t;
 
 typedef struct __attribute__((__packed__)) firm_s {

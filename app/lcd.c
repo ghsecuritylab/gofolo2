@@ -18,12 +18,14 @@
 #define BLACK 0
 #define WHITE 1
 
+uint8_t color_cfg = BLACK;
+
 #define LCD_PRINT(x, y, font, ...) \
     do { \
         char s[32]; \
         sprintf(s, ##__VA_ARGS__); \
         nrf_gfx_point_t p = NRF_GFX_POINT((x), (y)); \
-        APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &p, BLACK, s, (font), true)); \
+        APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &p, color_cfg, s, (font), true)); \
     } while(0)
 
 extern nav_t nav;
@@ -81,11 +83,11 @@ void show_seconds()
 
     strftime(s_str, 80, "%D", t);
     nrf_gfx_point_t s = NRF_GFX_POINT(30, 105);
-    APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &s, 0, s_str, &roboto_12ptFontInfo, true));
+    APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &s, color_cfg, s_str, &roboto_12ptFontInfo, true));
 
     strftime(s_str, 80, "%a", t);
     nrf_gfx_point_t wk = NRF_GFX_POINT(91, 10);
-    APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &wk, 0, s_str, &roboto_12ptFontInfo, true));
+    APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &wk, color_cfg, s_str, &roboto_12ptFontInfo, true));
 }
 
 void show_time()
@@ -97,7 +99,7 @@ void show_time()
     snprintf(time_str, 20, "%s", nrf_cal_get_time_string(false));
 
     nrf_gfx_point_t time_point = NRF_GFX_POINT(8, 20);
-    APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &time_point, 0, time_str, &carson_50ptFontInfo, true));
+    APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &time_point, color_cfg, time_str, &carson_50ptFontInfo, true));
 
     show_seconds();
 
@@ -166,6 +168,6 @@ void lcd_print(int y, char *st)
 {
     clear_lcd();
     nrf_gfx_point_t wk = NRF_GFX_POINT(10, y);
-    APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &wk, 0, st, &roboto_12ptFontInfo, true));
+    APP_ERROR_CHECK(nrf_gfx_print(p_lcd, &wk, color_cfg, st, &roboto_12ptFontInfo, true));
     nrf_gfx_display(p_lcd);
 }

@@ -1,6 +1,6 @@
 ==========================================================================================================
 
-GoFolo BLE Protocol v1.0:
+GoFolo BLE Protocol v1.1:
 
 PKT FORMAT: { CMD.1 [---------PAYLOAD----------] }
             ^----------- PKT_LEN ----------------^
@@ -14,8 +14,8 @@ CMDs:
         3: Configure the device: [ DATE_AND_TIME.4 | UNIT.1 ]
 
                                    DATE_AND_TIME - seconds since 1970-01-01 00:00:00 UTC
-                                       NEXT_TURN - 0: RIGHT, 1: LEFT, 2: OFF
                                             UNIT - 0: in meters, 1: in feet
+                                            COLOR - 0: black on white, 1: white on black
 
         4: Start navigation:     [ NO-PAYLOAD ] 
         5: Stop navigation:      [ NO-PAYLOAD ] 
