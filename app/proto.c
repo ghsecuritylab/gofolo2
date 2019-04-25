@@ -90,7 +90,7 @@ void data_handler(int len, const uint8_t *p)
             st = CMD_NAV_MODE;
             break;
         case CMD_STOP:
-            memset(nav, 0x00, sizeof(nav));
+            memset(&nav, 0x00, sizeof(nav));
             st = CMD_CLOCK_MDOE;
             break;
         case CMD_NAV:

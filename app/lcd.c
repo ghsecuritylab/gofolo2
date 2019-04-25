@@ -56,29 +56,29 @@ void show_seconds()
 
     if (t->tm_sec < 15) {
         nrf_gfx_line_t a = NRF_GFX_LINE(A, A, (t->tm_sec * 8), A, T);
-        APP_ERROR_CHECK(nrf_gfx_line_draw(p_lcd, &a, 0));
+        APP_ERROR_CHECK(nrf_gfx_line_draw(p_lcd, &a, color_cfg));
     } else if(t->tm_sec <= 30) {
         nrf_gfx_line_t a = NRF_GFX_LINE(A, A, W - A, A, T);
         nrf_gfx_line_t b = NRF_GFX_LINE(W - T, A, W - T, (t->tm_sec - 15) * 8, T);
-        APP_ERROR_CHECK(nrf_gfx_line_draw(p_lcd, &a, 0));
-        APP_ERROR_CHECK(nrf_gfx_line_draw(p_lcd, &b, 0));
+        APP_ERROR_CHECK(nrf_gfx_line_draw(p_lcd, &a, color_cfg));
+        APP_ERROR_CHECK(nrf_gfx_line_draw(p_lcd, &b, color_cfg));
     } else if(t->tm_sec <= 45) {
         nrf_gfx_line_t a = NRF_GFX_LINE(A, A, W - A, A, T);
         nrf_gfx_line_t b = NRF_GFX_LINE(W - T, A, W - T, W - A, T);
         nrf_gfx_line_t c = NRF_GFX_LINE(W - (t->tm_sec - 30) * 8, W - T, W - A, W - T, T);
-        APP_ERROR_CHECK(nrf_gfx_line_draw(p_lcd, &a, 0));
-        APP_ERROR_CHECK(nrf_gfx_line_draw(p_lcd, &b, 0));
-        APP_ERROR_CHECK(nrf_gfx_line_draw(p_lcd, &c, 0));
+        APP_ERROR_CHECK(nrf_gfx_line_draw(p_lcd, &a, color_cfg));
+        APP_ERROR_CHECK(nrf_gfx_line_draw(p_lcd, &b, color_cfg));
+        APP_ERROR_CHECK(nrf_gfx_line_draw(p_lcd, &c, color_cfg));
     } else if(t->tm_sec <= 60) {
         nrf_gfx_line_t a = NRF_GFX_LINE(A, A, W - A, A, T);
         nrf_gfx_line_t b = NRF_GFX_LINE(W - T, A, W - T, W - A, T);
         nrf_gfx_line_t c = NRF_GFX_LINE(A, W - T, W - A, W - T, T);
         nrf_gfx_line_t d = NRF_GFX_LINE(A, W - (t->tm_sec - 45) * 8, A, W - T, T);
 
-        APP_ERROR_CHECK(nrf_gfx_line_draw(p_lcd, &a, 0));
-        APP_ERROR_CHECK(nrf_gfx_line_draw(p_lcd, &b, 0));
-        APP_ERROR_CHECK(nrf_gfx_line_draw(p_lcd, &c, 0));
-        APP_ERROR_CHECK(nrf_gfx_line_draw(p_lcd, &d, 0));
+        APP_ERROR_CHECK(nrf_gfx_line_draw(p_lcd, &a, color_cfg));
+        APP_ERROR_CHECK(nrf_gfx_line_draw(p_lcd, &b, color_cfg));
+        APP_ERROR_CHECK(nrf_gfx_line_draw(p_lcd, &c, color_cfg));
+        APP_ERROR_CHECK(nrf_gfx_line_draw(p_lcd, &d, color_cfg));
     }
 
     strftime(s_str, 80, "%D", t);
@@ -116,7 +116,11 @@ void show_arrow(void)
     else 
         select_frame(p_lcd, 360 - ang);
 
-    LCD_PRINT(45, 128 - 20, &motorOil1937M54_14ptFontInfo, "%lum", nav.met);
+    if (nav.met / 1000) {
+        LCD_PRINT(45, 128 - 20, &motorOil1937M54_14ptFontInfo, "%lu.%lukm", (nav.met / 1000), ((nav.met % 1000) / 100));
+    } else {
+        LCD_PRINT(45, 128 - 20, &motorOil1937M54_14ptFontInfo, "%lum", nav.met);
+    }
 #if 0
     LCD_PRINT(0, 128 - 20, &orkney_8ptFontInfo, "Dr:%d", nav.dir);
     LCD_PRINT(0, 128 - 40, &orkney_8ptFontInfo, "M:%lu", nav.met);
@@ -128,13 +132,34 @@ void show_arrow(void)
     nrf_gfx_display(p_lcd);
 }
 
+#define COL1 1
+#define COL2 83
+
 void show_detail(void)
 {
+    uint32_t left;
+
     clear_lcd();
 
-    LCD_PRINT(5, 10, &orkney_8ptFontInfo, "DISTANCE");    LCD_PRINT(85, 10, &orkney_8ptFontInfo, "%lum", nav.dist);
-    LCD_PRINT(5, 40, &orkney_8ptFontInfo, "LEFT");        LCD_PRINT(85, 40, &orkney_8ptFontInfo, "%lum", (nav.dist - nav.cov));
-    LCD_PRINT(5, 95, &orkney_8ptFontInfo, "COVERED");     LCD_PRINT(85, 95, &orkney_8ptFontInfo, "%lum", nav.cov);
+    left = nav.dist - nav.cov;
+
+    if (nav.dist / 1000) {
+        LCD_PRINT(COL1, 10, &roboto_12ptFontInfo, "DISTANCE");    LCD_PRINT(COL2, 10, &roboto_12ptFontInfo, "%lu.%lukm", (nav.dist / 1000), ((nav.dist % 1000) / 100));
+    } else {
+        LCD_PRINT(COL1, 10, &roboto_12ptFontInfo, "DISTANCE");    LCD_PRINT(COL2, 10, &roboto_12ptFontInfo, "%lum", nav.dist);
+    }
+
+    if (left / 1000) {
+        LCD_PRINT(COL1, 40, &roboto_12ptFontInfo, "LEFT");        LCD_PRINT(COL2, 40, &roboto_12ptFontInfo, "%lu.%lukm", (left / 1000), ((left % 1000) / 100));
+    } else {
+        LCD_PRINT(COL1, 40, &roboto_12ptFontInfo, "LEFT");        LCD_PRINT(COL2, 40, &roboto_12ptFontInfo, "%lum", left);
+    }
+
+    if (nav.cov / 1000) {
+        LCD_PRINT(COL1, 95, &roboto_12ptFontInfo, "COVERED");     LCD_PRINT(COL2, 95, &roboto_12ptFontInfo, "%lu.%lukm", (nav.cov / 1000), ((nav.cov % 1000) / 100));
+    } else {
+        LCD_PRINT(COL1, 95, &roboto_12ptFontInfo, "COVERED");     LCD_PRINT(COL2, 95, &roboto_12ptFontInfo, "%lum", nav.cov);
+    }
 
     nrf_gfx_display(p_lcd);
 }

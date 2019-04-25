@@ -302,7 +302,6 @@ void calibrate(void)
 
 void imu_calibration_init(void)
 {
-    ret_code_t rc;
     flash_data_t *fd_ptr = (flash_data_t *)FLASH_START;
 
     if(fd_ptr->magic == CL_MAGIC) {
@@ -310,6 +309,8 @@ void imu_calibration_init(void)
         print_calibration(fd.max, fd.min, 0);
         nrf_delay_ms(4000);
     } else {
+        ret_code_t rc;
+
         calibrate();
 
         rc = nrf_fstorage_erase(&fstorage, FLASH_START, 1, NULL);

@@ -626,6 +626,7 @@ static void button_event_handler(uint8_t pin_no, uint8_t button_action)
                     st = 0;
                 else
                     st++;
+                color_cfg = !color_cfg;
                 break;
             case APP_BUTTON_RELEASE:
                 break;
@@ -715,7 +716,6 @@ int main(void)
                 show_arrow();
                 break;
             case CMD_DETAILED:
-                color_cfg = !color_cfg;
                 show_detail();
                 nrf_delay_ms(1000);
                 break;
